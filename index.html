@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Departamental: Estática</title>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax para renderizar ecuaciones LaTeX -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .option-btn { transition: all 0.2s ease-in-out; }
+        .option-btn:disabled { cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-blue-900 text-white p-4 shadow-md sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold">📚 Quiz Departamental: Estática</h1>
+            <span class="text-sm bg-blue-800 py-1 px-3 rounded-full hidden md:inline-block">Bedford & Fowler (Caps. 3-6)</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center p-4 md:p-8 w-full max-w-4xl mx-auto">
+        
+        <!-- Controles de Filtro -->
+        <div class="w-full bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap gap-2 justify-center border border-slate-200">
+            <span class="font-semibold text-slate-600 mr-2 self-center">Filtro:</span>
+            <button onclick="filterData('Todos')" class="filter-btn active bg-blue-600 text-white px-4 py-2 rounded transition" data-filter="Todos">Todos</button>
+            <button onclick="filterData(3)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="3">Capítulo 3</button>
+            <button onclick="filterData(4)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="4">Capítulo 4</button>
+            <button onclick="filterData(5)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="5">Capítulo 5</button>
+            <button onclick="filterData(6)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="6">Capítulo 6</button>
+        </div>
+
+        <!-- Tarjeta de Pregunta -->
+        <div class="w-full bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex flex-col">
+            
+            <div class="bg-blue-50 border-b border-blue-100 p-4 flex justify-between items-center">
+                <span id="cap-label" class="font-bold text-blue-800 uppercase tracking-wide text-sm">Capítulo X - Teoría</span>
+                <span id="counter-label" class="text-sm font-semibold text-blue-600 bg-white px-3 py-1 rounded-full border border-blue-200 shadow-sm">1 / 80</span>
+            </div>
+
+            <div class="p-6 md:p-8 flex-grow">
+                <p id="question-text" class="text-xl md:text-2xl text-slate-700 mb-8 font-medium leading-relaxed">
+                    Cargando pregunta...
+                </p>
+
+                <!-- Contenedor de Opciones Múltiples -->
+                <div id="options-container" class="flex flex-col gap-3 mb-6">
+                    <!-- Los botones se generan dinámicamente aquí -->
+                </div>
+
+                <!-- Controles de Ayuda -->
+                <div class="flex flex-wrap gap-4 mb-4">
+                    <button onclick="toggleHint()" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-800 font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2 border border-amber-300">
+                        💡 Mostrar Pista
+                    </button>
+                </div>
+
+                <!-- Pista (Oculta por defecto) -->
+                <div id="hint-container" class="hidden fade-in bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r mb-4">
+                    <p class="text-sm font-bold text-amber-800 mb-1">Pista Estratégica:</p>
+                    <p id="hint-text" class="text-amber-900">...</p>
+                </div>
+
+                <!-- Feedback Visual (Oculto por defecto) -->
+                <div id="feedback-container" class="hidden fade-in p-4 rounded-r mb-4 text-lg font-bold">
+                    <!-- Mensaje de Correcto/Incorrecto -->
+                </div>
+            </div>
+
+            <!-- Navegación -->
+            <div class="bg-slate-50 p-4 flex justify-between items-center border-t border-slate-200">
+                <button onclick="prevCard()" class="text-slate-500 hover:text-slate-800 font-semibold transition px-4 py-2">⬅ Anterior</button>
+                <button onclick="nextCard()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold transition shadow-md shadow-blue-200 text-lg">Siguiente ➡</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Script de Datos y Lógica -->
+    <script>
+        // Banco de Preguntas Completo (80 preguntas convertidas a Opción Múltiple)
+        const quizDatabase = [
+            // ================= CAPITULO 3: FUERZAS Y EQUILIBRIO =================
+            { cap: 3, type: "Teoría", q: "¿Cuál es la condición matemática vectorial necesaria y suficiente para que una partícula se encuentre en equilibrio estático?", h: "Aplica la Primera Ley de Newton para un cuerpo que no altera su estado de reposo.", opts: [
+                { t: "La suma vectorial de todas las fuerzas concurrentes debe ser igual a cero (\\(\\sum \\mathbf{F} = 0\\)).", c: true },
+                { t: "La suma de los momentos debe ser igual a cero (\\(\\sum \\mathbf{M} = 0\\)).", c: false },
+                { t: "Todas las fuerzas aplicadas deben ser paralelas entre sí.", c: false },
+                { t: "La partícula debe estar moviéndose a una aceleración constante.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "En el análisis de una partícula en el espacio tridimensional (3D), ¿cuántas ecuaciones escalares independientes de equilibrio se pueden formular?", h: "Corresponde al número de ejes en el plano cartesiano espacial.", opts: [
+                { t: "Seis ecuaciones independientes.", c: false },
+                { t: "Tres ecuaciones independientes (\\(\\sum F_x = 0, \\sum F_y = 0, \\sum F_z = 0\\)).", c: true },
+                { t: "Dos ecuaciones independientes.", c: false },
+                { t: "Una ecuación vectorial única.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "¿Cómo se relaciona la fuerza de un resorte lineal elástico con su deformación?", h: "Piensa en qué variables definen la rigidez y el estiramiento de un resorte.", opts: [
+                { t: "Es inversamente proporcional a su longitud original.", c: false },
+                { t: "Mediante la ley de Hooke (\\(F = k \\cdot s\\)), proporcional a la constante y al cambio en longitud.", c: true },
+                { t: "La fuerza es igual a la constante del resorte al cuadrado.", c: false },
+                { t: "Es independiente de la deformación mientras no se rompa el límite elástico.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "Al trazar el diagrama de cuerpo libre de una polea ideal (sin fricción ni masa), ¿qué propiedad tiene la fuerza del cable que pasa por ella?", h: "Una polea ideal solo redirige la fuerza, no la absorbe ni la incrementa.", opts: [
+                { t: "La tensión se duplica después de pasar por la polea.", c: false },
+                { t: "La tensión se reduce a la mitad para generar ventaja mecánica.", c: false },
+                { t: "La magnitud de la tensión se mantiene constante a lo largo de todo el cable continuo.", c: true },
+                { t: "La tensión depende del radio de la polea.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "Si una partícula está en equilibrio bajo la acción de exactamente dos fuerzas, ¿qué condiciones deben cumplir estas fuerzas?", h: "Imagina un juego de tirar de la cuerda donde el pañuelo central no se mueve.", opts: [
+                { t: "Deben ser perpendiculares y de igual magnitud.", c: false },
+                { t: "Deben tener la misma magnitud, misma línea de acción (colineales) y sentidos opuestos.", c: true },
+                { t: "Deben tener magnitudes diferentes que sumen cero vectorial.", c: false },
+                { t: "Deben formar un ángulo de 45 grados entre sí.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "¿Qué representan los cosenos directores de un vector de fuerza tridimensional?", h: "Son los componentes del vector unitario que define la dirección de la fuerza.", opts: [
+                { t: "Son los cosenos de los ángulos que forma el vector con cada eje coordenado positivo; sus cuadrados suman 1.", c: true },
+                { t: "Son las proyecciones de la fuerza en el plano XY exclusivamente.", c: false },
+                { t: "Son magnitudes escalares que indican el peso del objeto.", c: false },
+                { t: "Es el producto cruz entre el vector fuerza y la gravedad.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "Si se conoce la magnitud de una fuerza y las coordenadas espaciales de dos puntos sobre su línea de acción, ¿cómo se determina su vector cartesiano?", h: "Convierte primero la geometría de posición en un vector direccional puro.", opts: [
+                { t: "Sumando las coordenadas de ambos puntos y multiplicando por la magnitud.", c: false },
+                { t: "Calculando el producto cruz de ambos puntos espaciales.", c: false },
+                { t: "Multiplicando la magnitud de la fuerza por el vector unitario dirigido del punto inicial al final.", c: true },
+                { t: "Dividiendo la magnitud entre la distancia total entre los puntos.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "¿Qué tipo de fuerza interna es la única que puede soportar un cable o cuerda flexible?", h: "Físicamente no es posible 'empujar' con un objeto flexible sin que se doble.", opts: [
+                { t: "Fuerzas de compresión.", c: false },
+                { t: "Momentos flectores.", c: false },
+                { t: "Esfuerzos cortantes.", c: false },
+                { t: "Solo fuerzas de tensión (tracción dirigida alejándose de la partícula).", c: true }
+            ]},
+            { cap: 3, type: "Teoría", q: "En el método analítico de suma de fuerzas concurrentes, ¿qué representan los componentes cartesianos \\(F_x\\) y \\(F_y\\)?", h: "Imagina que iluminas el vector desde arriba y desde un lado.", opts: [
+                { t: "Las derivadas de la fuerza respecto al tiempo.", c: false },
+                { t: "Las proyecciones ortogonales (perpendiculares) del vector de fuerza sobre los ejes X e Y.", c: true },
+                { t: "El momento generado por la fuerza en esos ejes.", c: false },
+                { t: "Los vectores de posición de la partícula.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "Si tres fuerzas concurrentes coplanares mantienen a una partícula en equilibrio, geométricamente ¿qué figura forman al sumar los vectores de cabeza a cola?", h: "Si la resultante es cero, el camino vectorial debe regresar al punto de origen.", opts: [
+                { t: "Una parábola.", c: false },
+                { t: "Una línea recta infinita.", c: false },
+                { t: "Un triángulo cerrado.", c: true },
+                { t: "Un círculo perfecto.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "¿Por qué el peso de un objeto siempre se representa como un vector apuntando rígidamente hacia abajo en un DCL, sin importar la inclinación del apoyo?", h: "El campo gravitacional no depende de la geometría de la rampa.", opts: [
+                { t: "Porque la gravedad actúa siempre hacia el centro de la Tierra (dirección vertical descendente).", c: true },
+                { t: "Porque las superficies inclinadas no afectan la fricción.", c: false },
+                { t: "Porque el peso siempre es ortogonal a la superficie de contacto.", c: false },
+                { t: "Es una convención visual arbitraria sin base física.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "¿Qué establece el principio fundamental de transmisibilidad en mecánica estática?", h: "Empujar un objeto rígido desde atrás tiene el mismo efecto que tirar de él desde adelante.", opts: [
+                { t: "Las fuerzas se pueden transmitir a través del vacío sin pérdida de energía.", c: false },
+                { t: "Deslizar una fuerza sobre su propia línea de acción no altera el efecto externo sobre el cuerpo rígido.", c: true },
+                { t: "Una partícula transmite su masa a las partículas adyacentes.", c: false },
+                { t: "La tensión en un cable se transmite transversalmente.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "En componentes rectangulares 3D, si una fuerza forma un ángulo de \\(60^\\circ\\) con el eje X y \\(60^\\circ\\) con el eje Y, ¿qué ángulo forma con el eje Z positivo?", h: "Usa la identidad pitagórica de los cosenos directores: la suma de sus cuadrados es 1.", opts: [
+                { t: "\\(90^\\circ\\)", c: false },
+                { t: "\\(60^\\circ\\)", c: false },
+                { t: "\\(45^\\circ\\) o \\(135^\\circ\\)", c: true },
+                { t: "\\(30^\\circ\\)", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "Cuando una partícula se apoya sobre una superficie plana perfectamente lisa, ¿en qué dirección actúa la fuerza de reacción de la superficie?", h: "La palabra 'lisa' significa que no hay fricción tangencial.", opts: [
+                { t: "Paralela a la superficie de contacto.", c: false },
+                { t: "En dirección opuesta al movimiento de la partícula.", c: false },
+                { t: "Perfectamente perpendicular (normal) a la superficie de contacto.", c: true },
+                { t: "A 45 grados respecto al plano horizontal.", c: false }
+            ]},
+            { cap: 3, type: "Teoría", q: "Si el producto punto entre dos fuerzas concurrentes es cero, ¿cuál es su relación angular?", h: "Recuerda para qué ángulo el coseno vale cero.", opts: [
+                { t: "Son ortogonales (perpendiculares entre sí a \\(90^\\circ\\)).", c: true },
+                { t: "Son paralelas (\\(0^\\circ\\)).", c: false },
+                { t: "Son antiparalelas (\\(180^\\circ\\)).", c: false },
+                { t: "Forman un ángulo agudo.", c: false }
+            ]},
+            { cap: 3, type: "Práctica", q: "Un semáforo de 20 kg cuelga del centro de un cable flexible que se pandea. Si las dos mitades del cable forman ángulos de \\(15^\\circ\\) con la horizontal, ¿cuál es la tensión en el cable?", h: "\\(\\sum F_y = 0 \\rightarrow 2T \\sin(15^\\circ) = 20(9.81)\\)", opts: [
+                { t: "\\(\\approx 196\\text{ N}\\)", c: false },
+                { t: "\\(\\approx 379\\text{ N}\\)", c: true },
+                { t: "\\(\\approx 758\\text{ N}\\)", c: false },
+                { t: "\\(\\approx 100\\text{ N}\\)", c: false }
+            ]},
+            { cap: 3, type: "Práctica", q: "Una fuerza de 500 N se aplica a una partícula en el origen y está dirigida al punto (3, 4, 0) m. Determine su componente en el eje Y.", h: "El vector unitario es \\(0.6\\mathbf{i} + 0.8\\mathbf{j}\\). Multiplica la magnitud por la componente Y.", opts: [
+                { t: "300 N", c: false },
+                { t: "500 N", c: false },
+                { t: "250 N", c: false },
+                { t: "400 N", c: true }
+            ]},
+            { cap: 3, type: "Práctica", q: "Una partícula descansa sobre un plano inclinado a \\(30^\\circ\\) respecto a la horizontal. Si la componente del peso paralela al plano es de 100 N, ¿cuál es el peso total del objeto?", h: "\\(W \\sin(30^\\circ) = 100\\)", opts: [
+                { t: "50 N", c: false },
+                { t: "200 N", c: true },
+                { t: "115 N", c: false },
+                { t: "100 N", c: false }
+            ]},
+            { cap: 3, type: "Práctica", q: "Un resorte con longitud natural de 1.2 m y rigidez \\(k = 500\\text{ N/m}\\) se estira hasta 1.5 m. ¿Qué fuerza ejerce el resorte?", h: "\\(F = k \\cdot (L_f - L_0)\\)", opts: [
+                { t: "150 N", c: true },
+                { t: "600 N", c: false },
+                { t: "750 N", c: false },
+                { t: "300 N", c: false }
+            ]},
+            { cap: 3, type: "Práctica", q: "Tres fuerzas actúan sobre una partícula: \\(\\mathbf{F}_1 = 20\\mathbf{i}\\text{ N}\\), \\(\\mathbf{F}_2 = 10\\mathbf{j}\\text{ N}\\) y \\(\\mathbf{F}_3\\). Si la partícula está en equilibrio, determine \\(\\mathbf{F}_3\\).", h: "La sumatoria total de los tres vectores debe ser igual a cero.", opts: [
+                { t: "\\(\\mathbf{F}_3 = 20\\mathbf{i} + 10\\mathbf{j}\\text{ N}\\)", c: false },
+                { t: "\\(\\mathbf{F}_3 = -20\\mathbf{i} + 10\\mathbf{j}\\text{ N}\\)", c: false },
+                { t: "\\(\\mathbf{F}_3 = -20\\mathbf{i} - 10\\mathbf{j}\\text{ N}\\)", c: true },
+                { t: "\\(\\mathbf{F}_3 = 10\\mathbf{i} + 20\\mathbf{j}\\text{ N}\\)", c: false }
+            ]},
+
+            // ================= CAPITULO 4: MOMENTOS Y SISTEMAS =================
+            { cap: 4, type: "Teoría", q: "Defina el concepto vectorial de 'momento de una fuerza' con respecto a un punto.", h: "Involucra un producto vectorial entre el vector posición y el vector fuerza.", opts: [
+                { t: "Es la tendencia de la fuerza a causar traslación lineal.", c: false },
+                { t: "Es la tendencia de la fuerza a causar rotación, definido como \\(\\mathbf{M}_O = \\mathbf{r} \\times \\mathbf{F}\\).", c: true },
+                { t: "Es el producto punto entre la masa y la aceleración.", c: false },
+                { t: "Es el trabajo realizado por la fuerza a lo largo de una distancia.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "En el producto cruz \\(\\mathbf{M}_O = \\mathbf{r} \\times \\mathbf{F}\\), ¿qué representa el vector de posición \\(\\mathbf{r}\\)?", h: "Es el brazo de palanca vectorial que 'conecta' el pivote con la fuerza.", opts: [
+                { t: "El vector desde el punto de referencia hasta el centroide del cuerpo.", c: false },
+                { t: "Un vector unitario perpendicular al plano de rotación.", c: false },
+                { t: "Un vector trazado desde el punto de referencia hasta CUALQUIER punto sobre la línea de acción de la fuerza.", c: true },
+                { t: "La distancia escalar más corta (perpendicular) a la fuerza.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Qué regla determina convencionalmente el sentido y dirección del vector momento resultante en un espacio tridimensional?", h: "Involucra el uso de tu mano para alinear vectores cartesianos.", opts: [
+                { t: "La regla de la mano derecha.", c: true },
+                { t: "El teorema de los ejes paralelos.", c: false },
+                { t: "La regla de la mano izquierda de Fleming.", c: false },
+                { t: "La ley del paralelogramo.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Qué establece el Teorema de Varignon (Principio de Momentos)?", h: "Habla sobre descomponer una fuerza para facilitar el cálculo de momentos.", opts: [
+                { t: "El momento de una fuerza es siempre nulo si pasa por el centro de masa.", c: false },
+                { t: "El momento de una fuerza respecto a un punto es igual a la suma algebraica de los momentos de sus componentes.", c: true },
+                { t: "Para que haya equilibrio, la suma de las fuerzas debe ser igual a la suma de los momentos.", c: false },
+                { t: "El momento resultante depende de la velocidad de rotación.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Cómo se calcula la magnitud escalar del momento de una fuerza coplanar?", h: "Piensa en la fórmula más intuitiva del uso de una palanca.", opts: [
+                { t: "Multiplicando la fuerza por el coseno del ángulo de inclinación.", c: false },
+                { t: "Multiplicando la masa por la aceleración de la gravedad.", c: false },
+                { t: "Dividiendo la fuerza entre la distancia al pivote.", c: false },
+                { t: "Multiplicando la magnitud de la fuerza por la distancia perpendicular desde el eje a la línea de acción (\\(M = F \\cdot d\\)).", c: true }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Qué operación matemática se utiliza para encontrar el momento de una fuerza respecto a un eje específico arbitrario?", h: "Combina un producto escalar para proyectar, y un producto vectorial para generar el momento original.", opts: [
+                { t: "El producto triple escalar: \\(M_a = \\mathbf{u}_a \\cdot (\\mathbf{r} \\times \\mathbf{F})\\).", c: true },
+                { t: "La doble integral de área.", c: false },
+                { t: "El producto punto entre la fuerza y el vector posición.", c: false },
+                { t: "La derivada cruzada del momento principal.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Cuáles son las tres características que definen estrictamente a un 'par de fuerzas'?", h: "Imagina cómo tomas el volante de tu auto para girarlo en tu propio eje.", opts: [
+                { t: "Dos fuerzas perpendiculares de igual magnitud.", c: false },
+                { t: "Dos fuerzas de igual magnitud, líneas de acción paralelas y sentidos opuestos.", c: true },
+                { t: "Múltiples fuerzas concurrentes que suman cero.", c: false },
+                { t: "Dos fuerzas colineales y de sentido opuesto (que se cancelan totalmente).", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Por qué se dice que el momento de un par de fuerzas es un 'vector libre'?", h: "No requiere de un origen específico 'O' para mantener su valor.", opts: [
+                { t: "Porque no interactúa con el cuerpo rígido.", c: false },
+                { t: "Porque siempre es igual a cero en 3D.", c: false },
+                { t: "Porque su magnitud y dirección son idénticas independientemente del punto espacial respecto al cual se calcule.", c: true },
+                { t: "Porque no tiene magnitud definida, solo dirección.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "Si se desplaza una fuerza paralela a su línea de acción de un punto A a un punto B, ¿qué se debe añadir para mantener la equivalencia estática?", h: "Al mover la fuerza, se pierde la tendencia de giro original. Hay que reponerla sintéticamente.", opts: [
+                { t: "Se debe cambiar la magnitud de la fuerza.", c: false },
+                { t: "Un momento de par en B igual al momento que ejercía la fuerza original respecto al nuevo punto B.", c: true },
+                { t: "Una fuerza de fricción en sentido contrario.", c: false },
+                { t: "Un vector de posición adicional.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Qué significa que un sistema complejo de fuerzas se 'reduzca' a un sistema fuerza-par en un punto O?", h: "Es sintetizar traslación y rotación en su mínima expresión matemática.", opts: [
+                { t: "Eliminar todas las fuerzas para que el cuerpo quede en reposo.", c: false },
+                { t: "Transformar todas las fuerzas en vectores unitarios.", c: false },
+                { t: "Encontrar una única fuerza resultante y un único momento resultante en O que produzcan el mismo efecto externo.", c: true },
+                { t: "Mover el centro de masa del cuerpo hacia el punto O.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "Si la fuerza resultante y el momento resultante en un punto son perpendiculares entre sí, ¿a qué sistema se puede seguir reduciendo?", h: "Convierte el momento puro en una excentricidad (distancia) para la fuerza.", opts: [
+                { t: "Se reduce a cero absoluto (equilibrio perfecto).", c: false },
+                { t: "A un sistema de dos pares de fuerzas.", c: false },
+                { t: "A un par torsor puro.", c: false },
+                { t: "A una sola fuerza resultante desplazada a una nueva línea de acción.", c: true }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Qué es una 'llave de torsión' (wrench) en el análisis de sistemas equivalentes en 3D?", h: "Imagina el movimiento de usar un destornillador: empujar y girar sobre el mismo eje.", opts: [
+                { t: "Una herramienta física usada para apretar pernos estructurales.", c: false },
+                { t: "Un sistema de fuerzas concurrentes coplanares.", c: false },
+                { t: "La reducción espacial donde la fuerza resultante y el momento resultante son colineales.", c: true },
+                { t: "Un momento de inercia aplicado a una viga.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "Si el producto vectorial \\(\\mathbf{r} \\times \\mathbf{F}\\) es cero, ¿qué significa geométricamente?", h: "Si empujas exactamente en la bisagra de una puerta, no lograrás girarla.", opts: [
+                { t: "Que la fuerza es paralela al eje Z.", c: false },
+                { t: "Que el sistema está rotando a velocidad constante.", c: false },
+                { t: "Que la fuerza es igual a la masa por la aceleración.", c: false },
+                { t: "Que la línea de acción de la fuerza pasa exactamente por el punto de referencia (brazo de palanca nulo).", c: true }
+            ]},
+            { cap: 4, type: "Teoría", q: "En la notación escalar bidimensional, ¿qué convención de signos se utiliza universalmente para los momentos?", h: "Basado en la regla de la mano derecha en el plano XY.", opts: [
+                { t: "Positivo (+) antihorario, Negativo (-) horario.", c: true },
+                { t: "Positivo (+) hacia arriba, Negativo (-) hacia abajo.", c: false },
+                { t: "Positivo (+) horario, Negativo (-) antihorario.", c: false },
+                { t: "El signo depende del cuadrante donde se ubique la fuerza.", c: false }
+            ]},
+            { cap: 4, type: "Teoría", q: "¿Por qué es útil conocer el momento respecto a un eje en el diseño de mecanismos como bisagras?", h: "Un motor solo puede girar en torno al eje geométrico de su flecha.", opts: [
+                { t: "Porque determina el peso del mecanismo.", c: false },
+                { t: "Para conocer la longitud exacta de las barras del mecanismo.", c: false },
+                { t: "Porque indica la porción del momento total que efectivamente causará o resistirá la rotación física sobre ese eje.", c: true },
+                { t: "Porque elimina la fricción del sistema.", c: false }
+            ]},
+            { cap: 4, type: "Práctica", q: "Una fuerza vertical descendente de 100 N se aplica en el extremo de una viga en voladizo de 4 m. ¿Cuál es el momento respecto al empotramiento?", h: "Multiplica fuerza por distancia y aplica convención de signos (la fuerza empuja hacia abajo a la derecha del pivote).", opts: [
+                { t: "400 N\\(\\cdot\\)m (Antihorario)", c: false },
+                { t: "-400 N\\(\\cdot\\)m (Horario)", c: true },
+                { t: "25 N\\(\\cdot\\)m", c: false },
+                { t: "-100 N\\(\\cdot\\)m", c: false }
+            ]},
+            { cap: 4, type: "Práctica", q: "Determine el momento producido por un par de fuerzas paralelas opuestas de 50 N, separadas por una distancia perpendicular de 0.2 m.", h: "\\(M = F \\cdot d\\), no importa el punto de referencia.", opts: [
+                { t: "10 N\\(\\cdot\\)m", c: true },
+                { t: "25 N\\(\\cdot\\)m", c: false },
+                { t: "100 N\\(\\cdot\\)m", c: false },
+                { t: "0 N\\(\\cdot\\)m", c: false }
+            ]},
+            { cap: 4, type: "Práctica", q: "Una fuerza \\(\\mathbf{F} = (3\\mathbf{i} + 4\\mathbf{j})\\text{ N}\\) actúa en la posición \\(\\mathbf{r} = (5\\mathbf{i})\\text{ m}\\). Calcule el momento \\(\\mathbf{M}_O\\) usando producto cruz.", h: "Resuelve el determinante para los vectores \\(\\mathbf{i}, \\mathbf{j}, \\mathbf{k}\\). \\((5)(4) - (0)(3)\\).", opts: [
+                { t: "\\(15\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: false },
+                { t: "\\(20\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: true },
+                { t: "\\(12\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: false },
+                { t: "\\(-20\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: false }
+            ]},
+            { cap: 4, type: "Práctica", q: "Se reemplaza una fuerza descendente de 200 N en \\(x=2\\text{ m}\\) por un sistema en el origen. ¿Cuál es el nuevo sistema equivalente?", h: "Calcula el momento original y trasládalo junto con la fuerza.", opts: [
+                { t: "Fuerza 200 N (abajo) y momento horario de 400 N\\(\\cdot\\)m.", c: true },
+                { t: "Solo una fuerza de 200 N en el origen.", c: false },
+                { t: "Fuerza 200 N (arriba) y momento antihorario de 400 N\\(\\cdot\\)m.", c: false },
+                { t: "Un par de fuerzas puro de 400 N\\(\\cdot\\)m.", c: false }
+            ]},
+            { cap: 4, type: "Práctica", q: "Si un momento es de 600 N\\(\\cdot\\)m y la fuerza resultante es de 150 N, ¿a qué distancia debe desplazarse la fuerza para crear un sistema equivalente de 1 sola fuerza?", h: "Despeja \\(d\\) de la ecuación escalar de momento.", opts: [
+                { t: "0.25 m", c: false },
+                { t: "2 m", c: false },
+                { t: "4 m", c: true },
+                { t: "90000 m", c: false }
+            ]},
+
+            // ================= CAPITULO 5: CUERPOS RÍGIDOS =================
+            { cap: 5, type: "Teoría", q: "¿Cuál es la diferencia fundamental entre el equilibrio de una partícula y el de un cuerpo rígido?", h: "El cuerpo rígido tiene volumen, y por lo tanto, un brazo de palanca interno.", opts: [
+                { t: "El cuerpo rígido no puede tener aceleración.", c: false },
+                { t: "La partícula no considera la gravedad.", c: false },
+                { t: "El cuerpo rígido exige que tanto la sumatoria de fuerzas como la de momentos sean cero.", c: true },
+                { t: "El cuerpo rígido se analiza solo en 3D.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "En un DCL en 2D, ¿qué restricciones mecánicas y reacciones impone un soporte tipo 'rodillo' (roller)?", h: "Piensa en un patín sobre hielo.", opts: [
+                { t: "Impide traslación perpendicular (1 fuerza normal), permite deslizamiento y rotación.", c: true },
+                { t: "Impide toda traslación (2 fuerzas ortogonales).", c: false },
+                { t: "Impide rotación (1 momento reactivo).", c: false },
+                { t: "Impide todo movimiento (empotramiento total).", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿Qué incógnitas de reacción se asumen al sustituir un apoyo tipo 'pasador liso' (bisagra) en 2D?", h: "Una puerta puede girar en su bisagra, pero no zafarse de la pared.", opts: [
+                { t: "Un momento reactivo puro.", c: false },
+                { t: "Tres incógnitas: dos fuerzas y un momento.", c: false },
+                { t: "Dos fuerzas ortogonales de reacción (\\(R_x\\) y \\(R_y\\)), permitiendo rotación libre.", c: true },
+                { t: "Una fuerza perpendicular a la barra.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "En un empotramiento fijo en 2D (soporte fijo), ¿cuántas y cuáles son las incógnitas de reacción?", h: "El empotramiento es el soporte más restrictivo de todos.", opts: [
+                { t: "Dos fuerzas y dos momentos.", c: false },
+                { t: "Una fuerza y un momento.", c: false },
+                { t: "Tres: dos componentes de fuerza (\\(R_x, R_y\\)) y un momento de par reactivo.", c: true },
+                { t: "Solo fuerzas normales.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "En 3D, ¿qué tipo de conexión representa una 'rótula esférica' (ball and socket) y qué incógnitas genera?", h: "Funciona como la articulación de la cadera humana.", opts: [
+                { t: "Impide traslación (3 fuerzas) pero permite rotación libre en los 3 ejes.", c: true },
+                { t: "Impide rotación (3 momentos) pero permite traslación.", c: false },
+                { t: "Genera 6 incógnitas (empotramiento 3D).", c: false },
+                { t: "Es el equivalente 3D de un rodillo.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿Qué define a un 'miembro de dos fuerzas' y por qué es crucial identificarlo?", h: "Es la base para entender cómo funcionan las celosías o armaduras.", opts: [
+                { t: "Es un objeto que soporta dos momentos torsores en sus extremos.", c: false },
+                { t: "Cuerpo sometido a fuerzas en solo 2 puntos; dichas fuerzas deben ser colineales, de igual magnitud y opuestas.", c: true },
+                { t: "Un elemento curvo sometido a flexión transversal constante.", c: false },
+                { t: "Cualquier barra que pese más que las cargas aplicadas.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿Qué establece el principio sobre un 'miembro de tres fuerzas'?", h: "Si las líneas de acción no convergen, el sistema rotaría sin control.", opts: [
+                { t: "Las tres fuerzas deben ser siempre paralelas.", c: false },
+                { t: "Las líneas de acción de las tres fuerzas (si no son paralelas) deben concurrir en un solo punto.", c: true },
+                { t: "Una fuerza debe ser igual a la suma de las otras dos.", c: false },
+                { t: "El objeto debe ser obligatoriamente un triángulo.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "Un sistema es 'estáticamente indeterminado' (hiperestático) si...", h: "Hay más incógnitas de reacción que ecuaciones de la estática.", opts: [
+                { t: "No tiene suficientes soportes y colapsará.", c: false },
+                { t: "El número de incógnitas supera las ecuaciones de equilibrio disponibles.", c: true },
+                { t: "El objeto está en movimiento acelerado.", c: false },
+                { t: "Todas sus dimensiones son desconocidas.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿Qué es una 'restricción impropia' en estática?", h: "Imagina una caja pesada apoyada sobre cuatro ruedas de patineta orientadas igual.", opts: [
+                { t: "Un empotramiento en un material frágil.", c: false },
+                { t: "Ocurre cuando las reacciones externas son paralelas o concurrentes, permitiendo traslación o rotación no deseada.", c: true },
+                { t: "El uso de pasadores oxidados que no giran libremente.", c: false },
+                { t: "Una fuerza externa aplicada en el centroide exacto.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿Por qué es estratégico calcular la sumatoria de momentos en el punto donde hay un pasador liso?", h: "Los pasadores generan dos incógnitas de fuerza; si pivotas sobre ellas, desaparecen de tu ecuación.", opts: [
+                { t: "Porque anula el brazo de palanca de las incógnitas del pasador, eliminándolas de la ecuación temporalmente.", c: true },
+                { t: "Porque ahí el momento siempre es máximo.", c: false },
+                { t: "Porque los pasadores resisten momentos, simplificando el sistema.", c: false },
+                { t: "Es una regla visual, matemáticamente da el mismo trabajo.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿Cuántas ecuaciones de equilibrio linealmente independientes hay para un cuerpo rígido en 3D?", h: "Debes bloquear movimiento en cada eje (X, Y, Z) y giro alrededor de cada eje.", opts: [
+                { t: "3", c: false },
+                { t: "4", c: false },
+                { t: "6 (3 de fuerza, 3 de momento)", c: true },
+                { t: "9", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "Si al resolver el equilibrio asumes el sentido incorrecto de una reacción en el DCL, ¿qué pasará?", h: "Las matemáticas de la estática te corregirán automáticamente.", opts: [
+                { t: "El sistema de ecuaciones no tendrá solución.", c: false },
+                { t: "El resultado numérico será negativo, indicando que la dirección real es opuesta.", c: true },
+                { t: "Obtendrás una división por cero.", c: false },
+                { t: "El cuerpo resultará estáticamente indeterminado.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿Cómo se trata estáticamente una carga distribuida (ej. peso por longitud) para calcular reacciones de apoyo?", h: "Transformas una figura geométrica en una flecha representativa.", opts: [
+                { t: "Se reemplaza por múltiples fuerzas pequeñas a lo largo del eje.", c: false },
+                { t: "Se ignora si es menor al peso de la viga.", c: false },
+                { t: "Se reemplaza por una fuerza puntual equivalente, ubicada en el centroide del área de carga.", c: true },
+                { t: "Se divide a la mitad y se aplica en los extremos.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "En un soporte de 'chumacera de empuje' (thrust bearing) alineado en el eje X, ¿qué se previene?", h: "Este rodamiento resiste cargas longitudinales, como la hélice de un barco empujando su eje.", opts: [
+                { t: "Solo movimientos rotacionales.", c: false },
+                { t: "Traslación radial y traslación axial a lo largo de su flecha.", c: true },
+                { t: "El pandeo térmico de la barra.", c: false },
+                { t: "Únicamente la traslación vertical.", c: false }
+            ]},
+            { cap: 5, type: "Teoría", q: "¿El peso total de un cuerpo rígido uniforme se asume aplicado en qué punto específico?", h: "El punto de equilibrio perfecto.", opts: [
+                { t: "En la base de apoyo más grande.", c: false },
+                { t: "En el extremo derecho por convención.", c: false },
+                { t: "En su centro de gravedad (o centroide geométrico).", c: true },
+                { t: "Distribuido uniformemente solo en los pasadores.", c: false }
+            ]},
+            { cap: 5, type: "Práctica", q: "Viga AB de 10 m, pasador en A y rodillo en B. Carga de 500 N hacia abajo a 2 m de A. Calcule reacción vertical en B.", h: "\\(\\sum M_A = 0 \\rightarrow -500(2) + R_B(10) = 0\\)", opts: [
+                { t: "1000 N", c: false },
+                { t: "100 N", c: true },
+                { t: "250 N", c: false },
+                { t: "400 N", c: false }
+            ]},
+            { cap: 5, type: "Práctica", q: "Ménsula empotrada, momento horario externo de 200 N\\(\\cdot\\)m, fuerza descendente 50 N a 3 m. Calcule momento reactivo en empotramiento.", h: "El soporte debe resistir el momento externo MÁS el momento causado por la fuerza descendente \\(50 \\times 3\\).", opts: [
+                { t: "50 N\\(\\cdot\\)m", c: false },
+                { t: "150 N\\(\\cdot\\)m", c: false },
+                { t: "350 N\\(\\cdot\\)m (Antihorario)", c: true },
+                { t: "0 N\\(\\cdot\\)m", c: false }
+            ]},
+            { cap: 5, type: "Práctica", q: "Varilla AB sin peso, articulada en los extremos (0,0) y (3,4). A tensión con 50 N. Calcule la componente X de la fuerza en el pasador A.", h: "Triángulo 3-4-5. La componente horizontal se relaciona con el cateto X (que vale 3).", opts: [
+                { t: "40 N", c: false },
+                { t: "50 N", c: false },
+                { t: "30 N", c: true },
+                { t: "15 N", c: false }
+            ]},
+            { cap: 5, type: "Práctica", q: "Trampolín de 40 kg y 4 m sostenido por 2 pasadores: en extremo trasero, y a 1 m adelante. Determine la dirección de la reacción en el trasero.", h: "El peso a los 2m empuja el trampolín hacia abajo adelante, haciendo palanca que eleva la parte de atrás.", opts: [
+                { t: "Hacia arriba.", c: false },
+                { t: "Hacia abajo (jalando el trampolín para que no voltee).", c: true },
+                { t: "Horizontal a la izquierda.", c: false },
+                { t: "Horizontal a la derecha.", c: false }
+            ]},
+            { cap: 5, type: "Práctica", q: "Una fuerza en 3D paralela al eje Y hace rotar un objeto. ¿Cuáles ecuaciones de momento registrarán un valor distinto de cero?", h: "Una fuerza paralela a un eje no puede generar momento alrededor de ese mismo eje.", opts: [
+                { t: "\\(\\sum M_y\\) y \\(\\sum M_z\\)", c: false },
+                { t: "\\(\\sum M_x\\) y \\(\\sum M_y\\)", c: false },
+                { t: "\\(\\sum M_x\\) y \\(\\sum M_z\\)", c: true },
+                { t: "Solo \\(\\sum M_y\\)", c: false }
+            ]},
+
+            // ================= CAPITULO 6: ARMADURAS Y MARCOS =================
+            { cap: 6, type: "Teoría", q: "¿Cuál es la diferencia fundamental entre una armadura (truss) y un marco (frame)?", h: "Las armaduras son ensamblajes de barras esbeltas; los marcos tienen vigas pesadas.", opts: [
+                { t: "Las armaduras son de madera, los marcos de acero.", c: false },
+                { t: "Armadura: todos son miembros de dos fuerzas. Marco: al menos un miembro multifuerza.", c: true },
+                { t: "Las armaduras se mueven, los marcos son estáticos.", c: false },
+                { t: "No hay diferencia mecánica real.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "Nombre las dos asunciones principales en el diseño y análisis estático de armaduras ideales.", h: "Esto garantiza que los miembros solo sufran compresión o tensión axial.", opts: [
+                { t: "Conexiones por pasadores lisos y cargas aplicadas exclusivamente en los nudos.", c: true },
+                { t: "Uniones soldadas rígidamente y cargas distribuidas.", c: false },
+                { t: "Barras sin masa y cargas variables con el tiempo.", c: false },
+                { t: "Simetría perfecta y apoyos de rodillo en todos los nodos.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "¿Qué establece la condición de tensión y compresión visualmente en un DCL de un nudo?", h: "Piensa en el vector desde la perspectiva de la pequeña bolita (el pasador).", opts: [
+                { t: "Tensión empuja al nudo; compresión jala del nudo.", c: false },
+                { t: "Ambas dibujan el vector apuntando hacia abajo.", c: false },
+                { t: "Tensión jala y se aleja del nudo; Compresión aplasta y apunta hacia el nudo.", c: true },
+                { t: "Dependen del ángulo respecto al eje X.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "En el 'Método de los Nudos', ¿por qué se aísla cada unión como una partícula?", h: "Un punto en el espacio no tiene brazos de palanca.", opts: [
+                { t: "Para evitar usar trigonometría.", c: false },
+                { t: "Porque las fuerzas concurren en un punto, anulando ecuaciones de momento.", c: true },
+                { t: "Porque las barras se rompen más fácilmente por ahí.", c: false },
+                { t: "Para hacer el diagrama más grande visualmente.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "Al aplicar el Método de los Nudos en 2D, ¿cuál es el máximo de barras desconocidas que un nudo puede tener para ser resuelto?", h: "Solo tienes \\(\\sum F_x = 0\\) y \\(\\sum F_y = 0\\).", opts: [
+                { t: "3 barras desconocidas.", c: false },
+                { t: "2 barras desconocidas.", c: true },
+                { t: "4 barras desconocidas.", c: false },
+                { t: "Infinitas barras.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "Regla 'miembro cero': Nudo sin carga externa y solo 2 barras no colineales unidas. ¿Qué fuerzas tienen?", h: "No hay forma de que dos fuerzas con distinto ángulo se anulen mutuamente sin una tercera.", opts: [
+                { t: "Ambas tienen fuerza nula (cero).", c: true },
+                { t: "Una está en tensión y otra en compresión.", c: false },
+                { t: "Ambas soportan todo el peso de la armadura.", c: false },
+                { t: "Tienen fuerzas iguales a las reacciones de los apoyos.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "Regla 'miembro cero': Nudo sin carga, 3 barras unidas (2 de ellas colineales rectas). ¿Qué pasa con la tercera barra?", h: "Las dos rectas se equilibran entre sí, la intrusa lateral no tiene contraparte.", opts: [
+                { t: "Soporta el doble de fuerza que las otras.", c: false },
+                { t: "Las tres fuerzas se distribuyen por igual a 120 grados.", c: false },
+                { t: "La tercera barra (no colineal) tiene fuerza nula obligatoriamente.", c: true },
+                { t: "Romperá el equilibrio del nudo causando colapso.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "Si los miembros de fuerza cero teóricamente no soportan carga, ¿por qué se fabrican e instalan en armaduras reales?", h: "Un puente experimenta viento lateral o vibración al paso de vehículos.", opts: [
+                { t: "Solo por estética y simetría visual.", c: false },
+                { t: "Para agregar peso y asentar la estructura.", c: false },
+                { t: "Proveen estabilidad, previenen pandeo bajo compresión y soportan cambios de carga.", c: true },
+                { t: "Es un error de diseño común en ingeniería.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "¿En qué escenario es estratégicamente superior el 'Método de las Secciones' sobre el de Nudos?", h: "Imagina una torre de grúa inmensa y solo quieres saber la tensión de una barra en el medio.", opts: [
+                { t: "Para determinar las reacciones en los apoyos de tierra.", c: false },
+                { t: "Cuando necesitas hallar rápido la fuerza de una barra central sin calcular todo desde los bordes.", c: true },
+                { t: "Cuando la estructura tiene articulaciones oxidadas.", c: false },
+                { t: "Es obligatorio usarlo si hay cargas diagonales.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "¿Qué principio físico valida el uso del Método de las Secciones?", h: "Si partes un pastel que no se mueve, la porción cortada tampoco se moverá sola.", opts: [
+                { t: "Principio de transmisibilidad de masas.", c: false },
+                { t: "Teorema de Varignon estricto.", c: false },
+                { t: "Si el objeto completo está en equilibrio, cualquier fragmento o sección cortada también lo está.", c: true },
+                { t: "Tercera ley de la termodinámica.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "En el Método de las Secciones 2D, ¿cuántas barras desconocidas como máximo debes cortar para que el corte sea resoluble?", h: "Un fragmento cortado se comporta como un cuerpo rígido plano y aporta 3 ecuaciones estáticas.", opts: [
+                { t: "Mínimo 4.", c: false },
+                { t: "Máximo 3 barras incógnita.", c: true },
+                { t: "Solo 1 barra.", c: false },
+                { t: "Todas las que intercepte una línea horizontal estricta.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "Al seccionar tres barras, ¿cómo hallas la fuerza de una de ellas formulando una Sola Ecuación?", h: "Apunta al lugar geométrico donde las otras dos incógnitas cruzan sus líneas.", opts: [
+                { t: "Sumando las tres fuerzas y dividiendo por 3.", c: false },
+                { t: "Asumiendo que las diagonales valen cero.", c: false },
+                { t: "Aplicando momento exacto en la intersección visual de las otras dos barras cortadas.", c: true },
+                { t: "Tomando derivadas parciales del sistema general.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "En marcos, si separas mentalmente un pasador que une el Miembro A y B, ¿cómo dibujas la fuerza en cada DCL?", h: "Para cada acción, hay una reacción idéntica y en reversa.", opts: [
+                { t: "Solo se dibuja en el miembro más grande para simplificar.", c: false },
+                { t: "Se dibujan como fuerzas iguales apuntando hacia el mismo lado.", c: false },
+                { t: "Pares de fuerzas de igual magnitud pero sentido estrictamente opuesto en cada miembro (3a Ley de Newton).", c: true },
+                { t: "Se dibujan perpendiculares a la superficie de los miembros.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "¿Qué es una 'máquina' en el contexto de la estática estructural?", h: "Unos alicates o un gato hidráulico son ejemplos.", opts: [
+                { t: "Un ensamblaje estático que no admite ningún tipo de deformación.", c: false },
+                { t: "Estructuras diseñadas para alterar/transmitir fuerzas, con partes móviles y miembros multifuerza.", c: true },
+                { t: "Un motor de combustión interna analizado térmicamente.", c: false },
+                { t: "El equivalente matemático a un tensor de segundo orden.", c: false }
+            ]},
+            { cap: 6, type: "Teoría", q: "Si una polea está unida al eslabón de un marco y el cable la rodea, ¿cómo conviene aislarla en el DCL?", h: "Separar la rueda de la barra genera más incógnitas en el pasador interno.", opts: [
+                { t: "Manteniendo la polea unida al DCL y exponiendo las tensiones del cable cortado a los lados.", c: true },
+                { t: "Ignorar la polea si el cable no se mueve.", c: false },
+                { t: "Calcular primero la aceleración angular de la polea.", c: false },
+                { t: "Remover la polea y aplicar una carga concentrada doble en el pasador.", c: false }
+            ]},
+            { cap: 6, type: "Práctica", q: "Un nudo en forma de 'T' no tiene carga externa. La barra transversal (el techo de la T) es un solo tubo continuo. ¿Cuál es la fuerza en la barra perpendicular?", h: "La barra inferior vertical llega, choca en 90 grados, pero no tiene nadie que la contrarreste verticalmente.", opts: [
+                { t: "Es un promedio de las tensiones horizontales.", c: false },
+                { t: "Fuerza Cero.", c: true },
+                { t: "Tensión máxima, a punto de fluencia.", c: false },
+                { t: "Compresión infinita.", c: false }
+            ]},
+            { cap: 6, type: "Práctica", q: "En un nudo concurren carga vertical abajo 100N, barra A vertical y barra B horizontal. Calcule la fuerza en A y B.", h: "Separa X y Y mentalmente. B está sola en horizontal. A lucha sola contra la carga en vertical.", opts: [
+                { t: "A = 50 N, B = 50 N", c: false },
+                { t: "A = 0 N, B = 100 N", c: false },
+                { t: "A = 100 N (Tensión asumiendo nudo jalando arriba), B = Fuerza Cero.", c: true },
+                { t: "A = 100 N (Compresión asumiendo nudo bajando), B = 100 N", c: false }
+            ]},
+            { cap: 6, type: "Práctica", q: "Método Secciones: Se aísla mitad izquierda. Se cortan: cordón superior horizontal, cordón inferior horizontal y una diagonal. Para calcular el cordón INFERIOR, ¿dónde pivotas momentos?", h: "El cordón superior y la diagonal cortada se intersectarán en algún nudo de la parte superior derecha (fuera o dentro del diagrama cortado).", opts: [
+                { t: "En el apoyo del suelo.", c: false },
+                { t: "En el nudo superior donde se cruzan la línea del cordón superior y la diagonal cortada.", c: true },
+                { t: "En el centroide exacto del fragmento.", c: false },
+                { t: "En cualquier punto sobre el cordón inferior mismo.", c: false }
+            ]},
+            { cap: 6, type: "Práctica", q: "Polea de radio 0.5 m atornillada al final de un brazo de marco. Cable rodea polea con tensión de 200 N (ambos lados apuntan hacia abajo). Al dejar polea pegada al DCL del brazo, ¿qué efecto genera?", h: "Ambas fuerzas de 200N jalan el borde del disco.", opts: [
+                { t: "Una fuerza concentrada de 400N justo en el tornillo, sin momentos extra.", c: false },
+                { t: "Dos fuerzas de 200 N empujando hacia arriba en el pasador.", c: false },
+                { t: "Una fuerza de 200N en el tornillo central.", c: false },
+                { t: "Dos fuerzas abajo de 200 N, cada una ubicada a 0.5 m del pasador de la polea.", c: true }
+            ]},
+            { cap: 6, type: "Práctica", q: "Armadura triangular equilátera simple (3 nudos, 3 barras). Carga vertical F en el nudo superior cenital. ¿Cuál es la reacción vertical en los apoyos de la base?", h: "Un triángulo equilátero con carga central distribuye geométricamente perfecto la compresión a los lados.", opts: [
+                { t: "F/3 en cada apoyo.", c: false },
+                { t: "F en el apoyo derecho, 0 en el izquierdo.", c: false },
+                { t: "F/2 en cada apoyo vertical.", c: true },
+                { t: "F multiplicado por el coseno de 60 grados.", c: false }
+            ]}
+        ];
+
+        // Estado
+        let currentIndex = 0;
+        let filteredData = quizDatabase;
+        let currentOptions = [];
+        let hasAnsweredCurrent = false;
+
+        // Referencias al DOM
+        const qText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const hText = document.getElementById('hint-text');
+        const capLabel = document.getElementById('cap-label');
+        const counterLabel = document.getElementById('counter-label');
+        const hintContainer = document.getElementById('hint-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        // Utilidad para mezclar array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Inicializar
+        function init() {
+            renderCard();
+        }
+
+        // Filtrado por Capítulo
+        function filterData(cap) {
+            filterBtns.forEach(btn => {
+                if(btn.dataset.filter == cap) {
+                    btn.classList.add('bg-blue-600', 'text-white');
+                    btn.classList.remove('bg-slate-200', 'text-slate-700');
+                } else {
+                    btn.classList.add('bg-slate-200', 'text-slate-700');
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                }
+            });
+
+            if (cap === 'Todos') {
+                filteredData = quizDatabase;
+            } else {
+                filteredData = quizDatabase.filter(item => item.cap === parseInt(cap));
+            }
+            currentIndex = 0;
+            renderCard();
+        }
+
+        // Renderizar la tarjeta activa
+        function renderCard() {
+            if(filteredData.length === 0) return;
+
+            hasAnsweredCurrent = false;
+            feedbackContainer.classList.add('hidden');
+            hintContainer.classList.add('hidden');
+
+            const item = filteredData[currentIndex];
+            capLabel.innerText = `Capítulo ${item.cap} - ${item.type}`;
+            counterLabel.innerText = `Pregunta ${currentIndex + 1} de ${filteredData.length}`;
+            
+            qText.innerHTML = item.q;
+            hText.innerHTML = item.h;
+
+            // Clonar opciones y mezclarlas aleatoriamente
+            currentOptions = [...item.opts];
+            shuffleArray(currentOptions);
+
+            // Generar botones de opciones
+            optionsContainer.innerHTML = '';
+            currentOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 text-lg shadow-sm text-slate-700`;
+                btn.innerHTML = `<span class="font-bold mr-3 text-slate-400 block sm:inline-block mb-1 sm:mb-0">${String.fromCharCode(65 + index)}.</span> ${opt.t}`;
+                btn.onclick = () => handleSelection(btn, opt.c, index);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Procesar LaTeX de la nueva pregunta generada
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch(function (err) {
+                    console.log('MathJax error: ' + err.message);
+                });
+            }
+        }
+
+        // Evaluar selección
+        function handleSelection(clickedBtn, isCorrect, selectedIndex) {
+            if (hasAnsweredCurrent) return; // Evitar múltiples selecciones
+            hasAnsweredCurrent = true;
+
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            // Deshabilitar todos los botones
+            allBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300');
+                
+                // Mostrar correcta siempre
+                if (currentOptions[idx].c) {
+                    btn.classList.replace('border-slate-200', 'border-emerald-500');
+                    btn.classList.add('bg-emerald-50', 'text-emerald-900');
+                    btn.innerHTML += ` <span class="float-right text-emerald-600 font-bold">✅ Correcta</span>`;
+                }
+            });
+
+            // Reacción visual al botón clicado (si fue incorrecto)
+            if (!isCorrect) {
+                clickedBtn.classList.replace('border-slate-200', 'border-red-400');
+                clickedBtn.classList.add('bg-red-50', 'text-red-900');
+                clickedBtn.innerHTML += ` <span class="float-right text-red-600 font-bold">❌ Incorrecta</span>`;
+                
+                // Feedback
+                feedbackContainer.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800');
+                feedbackContainer.classList.add('bg-red-100', 'text-red-800');
+                feedbackContainer.innerHTML = 'Repasa la teoría. Lee la pista para comprender la lógica detrás de la opción correcta.';
+            } else {
+                feedbackContainer.classList.remove('hidden', 'bg-red-100', 'text-red-800');
+                feedbackContainer.classList.add('bg-emerald-100', 'text-emerald-800');
+                feedbackContainer.innerHTML = '¡Excelente razonamiento estático!';
+            }
+        }
+
+        // Mostrar u ocultar pista
+        function toggleHint() {
+            hintContainer.classList.toggle('hidden');
+        }
+
+        // Controles de navegación
+        function nextCard() {
+            if (currentIndex < filteredData.length - 1) {
+                currentIndex++;
+                renderCard();
+            } else {
+                alert("¡Felicidades! Has revisado todas las preguntas de esta selección.");
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard();
+            }
+        }
+
+        // Iniciar al cargar
+        window.onload = init;
+    </script>
+</body>
+</html>
