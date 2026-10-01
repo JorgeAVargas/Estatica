@@ -1,731 +1,1730 @@
 <!DOCTYPE html>
+<!--
+  Repaso del 1.er departamental — Estática (I7412) — CUCEI, Ciclo 2026B
+  Prof. Jorge Alberto Vargas Carmona
+
+  ESTE ARCHIVO SE GENERA con generar_quiz.py (las preguntas y las respuestas
+  viven ahí y se verifican numéricamente). Para cambiar una pregunta, edite
+  el guion y vuelva a ejecutarlo; no edite index.html a mano.
+-->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Departamental: Estática</title>
-    <!-- Tailwind CSS para el diseño -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- MathJax para renderizar ecuaciones LaTeX -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
+    <title>Repaso 1.er departamental - Estática - CUCEI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- MathJax 3. Se carga con defer: corre después de que el quiz ya está en la página. -->
+    <script>
+        window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        :root {
+            --theory-blue: #0056b3;
+            --theory-bg: #f0f7ff;
+            --numeric-red: #d93025;
+            --numeric-bg: #fff5f5;
+            --success-green: #1e7e34;
+        }
+        html { scroll-padding-top: 90px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #333; line-height: 1.6; }
+        .header-section {
+            background: linear-gradient(135deg, #003366 0%, #0056b3 100%);
+            color: white; padding: 2.5rem 0; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .container { max-width: 900px; }
+
+        /* Barra de avance */
+        .barra-avance {
+            position: sticky; top: 0; z-index: 10; background: #fff;
+            border-bottom: 1px solid #dee2e6; padding: 10px 0; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .barra-avance .progress { height: 8px; }
+        .btn-reiniciar { font-size: 0.8rem; }
+
+        /* Recuadros informativos */
+        .convenios { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 16px 20px; margin-bottom: 1rem; font-size: 0.95rem; }
+        .indice a { text-decoration: none; }
+        .ref-bloque { font-size: 0.9rem; color: #6c757d; margin-top: -0.6rem; margin-bottom: 1.2rem; }
+
+        /* Tarjetas */
+        .problem-card, .numeric-card {
+            border-radius: 8px; padding: 20px; margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .problem-card { background-color: var(--theory-bg); border-left: 6px solid var(--theory-blue); }
+        .numeric-card { background-color: var(--numeric-bg); border-left: 6px solid var(--numeric-red); }
+        .problem-card:hover, .numeric-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h3, p strong { color: #2c3e50; }
+        .insignia { font-size: 0.75rem; font-weight: 600; margin-left: 6px; }
+
+        ul.opciones { list-style: none; padding-left: 0; }
+        ul.opciones li { margin-bottom: 6px; border-radius: 4px; transition: background 0.2s; }
+        ul.opciones li:hover { background: rgba(0,0,0,0.03); }
+        ul.opciones label { display: block; padding: 8px; cursor: pointer; }
+        input[type="radio"] { margin-right: 10px; cursor: pointer; }
+
+        .campo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .campo .etiqueta { min-width: 110px; }
+        .campo input {
+            padding: 6px 8px; border: 2px solid #ddd; border-radius: 5px; width: 160px; max-width: 100%;
+        }
+        .campo input.bien { border-color: var(--success-green); }
+        .campo input.mal { border-color: var(--numeric-red); }
+        .campo .marca { font-size: 0.85rem; font-weight: 600; }
+        @media (max-width: 480px) {
+            .campo .etiqueta { flex-basis: 100%; min-width: 0; margin-bottom: -4px; }
+            .campo input { width: 9rem; }
+        }
+
+        .btn-check-answer {
+            background-color: #2c3e50; color: white; border: none; padding: 8px 18px;
+            border-radius: 5px; font-weight: 600; transition: all 0.3s;
+        }
+        .btn-check-answer:hover { background-color: #1a252f; }
+        .btn-solucion {
+            background: none; border: 1px solid #6c757d; color: #495057; padding: 7px 14px;
+            border-radius: 5px; font-weight: 600; margin-left: 8px; display: none;
+        }
+
+        .idea-clave {
+            display: none; margin-top: 15px; padding: 15px; background-color: #e9ecef; border-radius: 6px;
+            border-left: 4px solid #6c757d; font-size: 0.95rem; animation: fadeIn 0.4s ease-in; overflow-x: auto;
+        }
+        .pista-calculo { font-size: 0.85rem; color: #d93025; font-style: italic; margin-bottom: 10px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        .option-btn { transition: all 0.2s ease-in-out; }
-        .option-btn:disabled { cursor: not-allowed; }
+        .correct-feedback { color: var(--success-green); font-weight: bold; margin: 10px 0 0; }
+        .wrong-feedback { color: var(--numeric-red); font-weight: bold; margin: 10px 0 0; }
+        .aviso-feedback { color: #8a5a00; font-weight: bold; margin: 10px 0 0; }
+        .retro {
+            margin: 6px 0 0; padding: 10px 14px; background: #fff; border-radius: 6px;
+            border-left: 4px solid #f1aeb5; font-size: 0.95rem; overflow-x: auto;
+        }
+        .retro ul { margin: 0; padding-left: 1.1rem; }
+        .retro li { margin-bottom: 4px; }
+        footer { color: #6c757d; font-size: 0.85rem; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+<body>
 
-    <!-- Header -->
-    <header class="bg-blue-900 text-white p-4 shadow-md sticky top-0 z-10">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl md:text-2xl font-bold">📚 Quiz Departamental: Estática</h1>
-            <span class="text-sm bg-blue-800 py-1 px-3 rounded-full hidden md:inline-block">Bedford & Fowler (Caps. 3-6)</span>
+    <header class="header-section text-center">
+        <div class="container">
+            <h1 class="fw-bold">Repaso para el 1.<sup>er</sup> departamental</h1>
+            <p class="lead mb-0">Estática · Unidades y álgebra vectorial · CUCEI</p>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center p-4 md:p-8 w-full max-w-4xl mx-auto">
-        
-        <!-- Controles de Filtro -->
-        <div class="w-full bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap gap-2 justify-center border border-slate-200">
-            <span class="font-semibold text-slate-600 mr-2 self-center">Filtro:</span>
-            <button onclick="filterData('Todos')" class="filter-btn active bg-blue-600 text-white px-4 py-2 rounded transition" data-filter="Todos">Todos</button>
-            <button onclick="filterData(3)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="3">Capítulo 3</button>
-            <button onclick="filterData(4)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="4">Capítulo 4</button>
-            <button onclick="filterData(5)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="5">Capítulo 5</button>
-            <button onclick="filterData(6)" class="filter-btn bg-slate-200 text-slate-700 hover:bg-slate-300 px-4 py-2 rounded transition" data-filter="6">Capítulo 6</button>
+    <div class="barra-avance">
+        <div class="container d-flex align-items-center gap-3">
+            <div class="flex-grow-1">
+                <div class="small mb-1"><strong id="cuenta-ok">0</strong> correctas de 52
+                    <span class="text-muted" id="cuenta-vistas"></span></div>
+                <div class="progress" role="progressbar" aria-label="Avance">
+                    <div class="progress-bar bg-success" id="barra" style="width: 0%"></div>
+                </div>
+            </div>
+            <button class="btn btn-outline-secondary btn-sm btn-reiniciar" id="reiniciar">Reiniciar</button>
+        </div>
+    </div>
+
+    <main class="container mt-4">
+
+        <div class="convenios">
+            <p class="mb-2"><strong>Cómo usar este repaso.</strong> Resuelva cada pregunta en su cuaderno y después verifique.
+            Las de <span style="color: var(--theory-blue); font-weight: 600;">azul</span> son de teoría (opción múltiple);
+            las de <span style="color: var(--numeric-red); font-weight: 600;">rojo</span> son ejercicios numéricos.
+            Si se equivoca, la página le dice qué pudo haber fallado; si falla dos veces, puede ver la solución. Su avance se guarda en este navegador.</p>
+            <p class="mb-0"><strong>Convenios del curso (los de Bedford):</strong> vectores en negritas (\(\mathbf{F}\)) y magnitudes
+            \(|\mathbf{F}|\); ejes derechos (\(\mathbf{i}\times\mathbf{j} = \mathbf{k}\)); en el plano, \(x\) a la derecha y \(y\) hacia arriba,
+            con ángulos desde \(+x\) en sentido antihorario salvo que se diga otra cosa; \(\mathbf{r}_{AB}\) va <b>de \(A\) a \(B\)</b>;
+            \(g = 9.81\ \text{m/s}^2 = 32.2\ \text{pies/s}^2\).
+            Conteste con tres cifras significativas, en las unidades que se piden (se acepta una diferencia de 1.5 %); puede usar punto o coma decimal.
+            </p>
         </div>
 
-        <!-- Tarjeta de Pregunta -->
-        <div class="w-full bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex flex-col">
-            
-            <div class="bg-blue-50 border-b border-blue-100 p-4 flex justify-between items-center">
-                <span id="cap-label" class="font-bold text-blue-800 uppercase tracking-wide text-sm">Capítulo X - Teoría</span>
-                <span id="counter-label" class="text-sm font-semibold text-blue-600 bg-white px-3 py-1 rounded-full border border-blue-200 shadow-sm">1 / 80</span>
-            </div>
+        <nav class="indice mb-4" id="indice" aria-label="Bloques del repaso"></nav>
 
-            <div class="p-6 md:p-8 flex-grow">
-                <p id="question-text" class="text-xl md:text-2xl text-slate-700 mb-8 font-medium leading-relaxed">
-                    Cargando pregunta...
-                </p>
+        <div id="preguntas"></div>
 
-                <!-- Contenedor de Opciones Múltiples -->
-                <div id="options-container" class="flex flex-col gap-3 mb-6">
-                    <!-- Los botones se generan dinámicamente aquí -->
-                </div>
-
-                <!-- Controles de Ayuda -->
-                <div class="flex flex-wrap gap-4 mb-4">
-                    <button onclick="toggleHint()" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-800 font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2 border border-amber-300">
-                        💡 Mostrar Pista
-                    </button>
-                </div>
-
-                <!-- Pista (Oculta por defecto) -->
-                <div id="hint-container" class="hidden fade-in bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r mb-4">
-                    <p class="text-sm font-bold text-amber-800 mb-1">Pista Estratégica:</p>
-                    <p id="hint-text" class="text-amber-900">...</p>
-                </div>
-
-                <!-- Feedback Visual (Oculto por defecto) -->
-                <div id="feedback-container" class="hidden fade-in p-4 rounded-r mb-4 text-lg font-bold">
-                    <!-- Mensaje de Correcto/Incorrecto -->
-                </div>
-            </div>
-
-            <!-- Navegación -->
-            <div class="bg-slate-50 p-4 flex justify-between items-center border-t border-slate-200">
-                <button onclick="prevCard()" class="text-slate-500 hover:text-slate-800 font-semibold transition px-4 py-2">⬅ Anterior</button>
-                <button onclick="nextCard()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold transition shadow-md shadow-blue-200 text-lg">Siguiente ➡</button>
-            </div>
-        </div>
+        <footer class="text-center py-4 border-top mt-5">
+            Prof. Jorge Alberto Vargas Carmona · Estática (I7412) · CUCEI, Universidad de Guadalajara · Ciclo 2026B
+        </footer>
     </main>
 
-    <!-- Script de Datos y Lógica -->
     <script>
-        // Banco de Preguntas Completo (80 preguntas convertidas a Opción Múltiple)
-        const quizDatabase = [
-            // ================= CAPITULO 3: FUERZAS Y EQUILIBRIO =================
-            { cap: 3, type: "Teoría", q: "¿Cuál es la condición matemática vectorial necesaria y suficiente para que una partícula se encuentre en equilibrio estático?", h: "Aplica la Primera Ley de Newton para un cuerpo que no altera su estado de reposo.", opts: [
-                { t: "La suma vectorial de todas las fuerzas concurrentes debe ser igual a cero (\\(\\sum \\mathbf{F} = 0\\)).", c: true },
-                { t: "La suma de los momentos debe ser igual a cero (\\(\\sum \\mathbf{M} = 0\\)).", c: false },
-                { t: "Todas las fuerzas aplicadas deben ser paralelas entre sí.", c: false },
-                { t: "La partícula debe estar moviéndose a una aceleración constante.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "En el análisis de una partícula en el espacio tridimensional (3D), ¿cuántas ecuaciones escalares independientes de equilibrio se pueden formular?", h: "Corresponde al número de ejes en el plano cartesiano espacial.", opts: [
-                { t: "Seis ecuaciones independientes.", c: false },
-                { t: "Tres ecuaciones independientes (\\(\\sum F_x = 0, \\sum F_y = 0, \\sum F_z = 0\\)).", c: true },
-                { t: "Dos ecuaciones independientes.", c: false },
-                { t: "Una ecuación vectorial única.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "¿Cómo se relaciona la fuerza de un resorte lineal elástico con su deformación?", h: "Piensa en qué variables definen la rigidez y el estiramiento de un resorte.", opts: [
-                { t: "Es inversamente proporcional a su longitud original.", c: false },
-                { t: "Mediante la ley de Hooke (\\(F = k \\cdot s\\)), proporcional a la constante y al cambio en longitud.", c: true },
-                { t: "La fuerza es igual a la constante del resorte al cuadrado.", c: false },
-                { t: "Es independiente de la deformación mientras no se rompa el límite elástico.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "Al trazar el diagrama de cuerpo libre de una polea ideal (sin fricción ni masa), ¿qué propiedad tiene la fuerza del cable que pasa por ella?", h: "Una polea ideal solo redirige la fuerza, no la absorbe ni la incrementa.", opts: [
-                { t: "La tensión se duplica después de pasar por la polea.", c: false },
-                { t: "La tensión se reduce a la mitad para generar ventaja mecánica.", c: false },
-                { t: "La magnitud de la tensión se mantiene constante a lo largo de todo el cable continuo.", c: true },
-                { t: "La tensión depende del radio de la polea.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "Si una partícula está en equilibrio bajo la acción de exactamente dos fuerzas, ¿qué condiciones deben cumplir estas fuerzas?", h: "Imagina un juego de tirar de la cuerda donde el pañuelo central no se mueve.", opts: [
-                { t: "Deben ser perpendiculares y de igual magnitud.", c: false },
-                { t: "Deben tener la misma magnitud, misma línea de acción (colineales) y sentidos opuestos.", c: true },
-                { t: "Deben tener magnitudes diferentes que sumen cero vectorial.", c: false },
-                { t: "Deben formar un ángulo de 45 grados entre sí.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "¿Qué representan los cosenos directores de un vector de fuerza tridimensional?", h: "Son los componentes del vector unitario que define la dirección de la fuerza.", opts: [
-                { t: "Son los cosenos de los ángulos que forma el vector con cada eje coordenado positivo; sus cuadrados suman 1.", c: true },
-                { t: "Son las proyecciones de la fuerza en el plano XY exclusivamente.", c: false },
-                { t: "Son magnitudes escalares que indican el peso del objeto.", c: false },
-                { t: "Es el producto cruz entre el vector fuerza y la gravedad.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "Si se conoce la magnitud de una fuerza y las coordenadas espaciales de dos puntos sobre su línea de acción, ¿cómo se determina su vector cartesiano?", h: "Convierte primero la geometría de posición en un vector direccional puro.", opts: [
-                { t: "Sumando las coordenadas de ambos puntos y multiplicando por la magnitud.", c: false },
-                { t: "Calculando el producto cruz de ambos puntos espaciales.", c: false },
-                { t: "Multiplicando la magnitud de la fuerza por el vector unitario dirigido del punto inicial al final.", c: true },
-                { t: "Dividiendo la magnitud entre la distancia total entre los puntos.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "¿Qué tipo de fuerza interna es la única que puede soportar un cable o cuerda flexible?", h: "Físicamente no es posible 'empujar' con un objeto flexible sin que se doble.", opts: [
-                { t: "Fuerzas de compresión.", c: false },
-                { t: "Momentos flectores.", c: false },
-                { t: "Esfuerzos cortantes.", c: false },
-                { t: "Solo fuerzas de tensión (tracción dirigida alejándose de la partícula).", c: true }
-            ]},
-            { cap: 3, type: "Teoría", q: "En el método analítico de suma de fuerzas concurrentes, ¿qué representan los componentes cartesianos \\(F_x\\) y \\(F_y\\)?", h: "Imagina que iluminas el vector desde arriba y desde un lado.", opts: [
-                { t: "Las derivadas de la fuerza respecto al tiempo.", c: false },
-                { t: "Las proyecciones ortogonales (perpendiculares) del vector de fuerza sobre los ejes X e Y.", c: true },
-                { t: "El momento generado por la fuerza en esos ejes.", c: false },
-                { t: "Los vectores de posición de la partícula.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "Si tres fuerzas concurrentes coplanares mantienen a una partícula en equilibrio, geométricamente ¿qué figura forman al sumar los vectores de cabeza a cola?", h: "Si la resultante es cero, el camino vectorial debe regresar al punto de origen.", opts: [
-                { t: "Una parábola.", c: false },
-                { t: "Una línea recta infinita.", c: false },
-                { t: "Un triángulo cerrado.", c: true },
-                { t: "Un círculo perfecto.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "¿Por qué el peso de un objeto siempre se representa como un vector apuntando rígidamente hacia abajo en un DCL, sin importar la inclinación del apoyo?", h: "El campo gravitacional no depende de la geometría de la rampa.", opts: [
-                { t: "Porque la gravedad actúa siempre hacia el centro de la Tierra (dirección vertical descendente).", c: true },
-                { t: "Porque las superficies inclinadas no afectan la fricción.", c: false },
-                { t: "Porque el peso siempre es ortogonal a la superficie de contacto.", c: false },
-                { t: "Es una convención visual arbitraria sin base física.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "¿Qué establece el principio fundamental de transmisibilidad en mecánica estática?", h: "Empujar un objeto rígido desde atrás tiene el mismo efecto que tirar de él desde adelante.", opts: [
-                { t: "Las fuerzas se pueden transmitir a través del vacío sin pérdida de energía.", c: false },
-                { t: "Deslizar una fuerza sobre su propia línea de acción no altera el efecto externo sobre el cuerpo rígido.", c: true },
-                { t: "Una partícula transmite su masa a las partículas adyacentes.", c: false },
-                { t: "La tensión en un cable se transmite transversalmente.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "En componentes rectangulares 3D, si una fuerza forma un ángulo de \\(60^\\circ\\) con el eje X y \\(60^\\circ\\) con el eje Y, ¿qué ángulo forma con el eje Z positivo?", h: "Usa la identidad pitagórica de los cosenos directores: la suma de sus cuadrados es 1.", opts: [
-                { t: "\\(90^\\circ\\)", c: false },
-                { t: "\\(60^\\circ\\)", c: false },
-                { t: "\\(45^\\circ\\) o \\(135^\\circ\\)", c: true },
-                { t: "\\(30^\\circ\\)", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "Cuando una partícula se apoya sobre una superficie plana perfectamente lisa, ¿en qué dirección actúa la fuerza de reacción de la superficie?", h: "La palabra 'lisa' significa que no hay fricción tangencial.", opts: [
-                { t: "Paralela a la superficie de contacto.", c: false },
-                { t: "En dirección opuesta al movimiento de la partícula.", c: false },
-                { t: "Perfectamente perpendicular (normal) a la superficie de contacto.", c: true },
-                { t: "A 45 grados respecto al plano horizontal.", c: false }
-            ]},
-            { cap: 3, type: "Teoría", q: "Si el producto punto entre dos fuerzas concurrentes es cero, ¿cuál es su relación angular?", h: "Recuerda para qué ángulo el coseno vale cero.", opts: [
-                { t: "Son ortogonales (perpendiculares entre sí a \\(90^\\circ\\)).", c: true },
-                { t: "Son paralelas (\\(0^\\circ\\)).", c: false },
-                { t: "Son antiparalelas (\\(180^\\circ\\)).", c: false },
-                { t: "Forman un ángulo agudo.", c: false }
-            ]},
-            { cap: 3, type: "Práctica", q: "Un semáforo de 20 kg cuelga del centro de un cable flexible que se pandea. Si las dos mitades del cable forman ángulos de \\(15^\\circ\\) con la horizontal, ¿cuál es la tensión en el cable?", h: "\\(\\sum F_y = 0 \\rightarrow 2T \\sin(15^\\circ) = 20(9.81)\\)", opts: [
-                { t: "\\(\\approx 196\\text{ N}\\)", c: false },
-                { t: "\\(\\approx 379\\text{ N}\\)", c: true },
-                { t: "\\(\\approx 758\\text{ N}\\)", c: false },
-                { t: "\\(\\approx 100\\text{ N}\\)", c: false }
-            ]},
-            { cap: 3, type: "Práctica", q: "Una fuerza de 500 N se aplica a una partícula en el origen y está dirigida al punto (3, 4, 0) m. Determine su componente en el eje Y.", h: "El vector unitario es \\(0.6\\mathbf{i} + 0.8\\mathbf{j}\\). Multiplica la magnitud por la componente Y.", opts: [
-                { t: "300 N", c: false },
-                { t: "500 N", c: false },
-                { t: "250 N", c: false },
-                { t: "400 N", c: true }
-            ]},
-            { cap: 3, type: "Práctica", q: "Una partícula descansa sobre un plano inclinado a \\(30^\\circ\\) respecto a la horizontal. Si la componente del peso paralela al plano es de 100 N, ¿cuál es el peso total del objeto?", h: "\\(W \\sin(30^\\circ) = 100\\)", opts: [
-                { t: "50 N", c: false },
-                { t: "200 N", c: true },
-                { t: "115 N", c: false },
-                { t: "100 N", c: false }
-            ]},
-            { cap: 3, type: "Práctica", q: "Un resorte con longitud natural de 1.2 m y rigidez \\(k = 500\\text{ N/m}\\) se estira hasta 1.5 m. ¿Qué fuerza ejerce el resorte?", h: "\\(F = k \\cdot (L_f - L_0)\\)", opts: [
-                { t: "150 N", c: true },
-                { t: "600 N", c: false },
-                { t: "750 N", c: false },
-                { t: "300 N", c: false }
-            ]},
-            { cap: 3, type: "Práctica", q: "Tres fuerzas actúan sobre una partícula: \\(\\mathbf{F}_1 = 20\\mathbf{i}\\text{ N}\\), \\(\\mathbf{F}_2 = 10\\mathbf{j}\\text{ N}\\) y \\(\\mathbf{F}_3\\). Si la partícula está en equilibrio, determine \\(\\mathbf{F}_3\\).", h: "La sumatoria total de los tres vectores debe ser igual a cero.", opts: [
-                { t: "\\(\\mathbf{F}_3 = 20\\mathbf{i} + 10\\mathbf{j}\\text{ N}\\)", c: false },
-                { t: "\\(\\mathbf{F}_3 = -20\\mathbf{i} + 10\\mathbf{j}\\text{ N}\\)", c: false },
-                { t: "\\(\\mathbf{F}_3 = -20\\mathbf{i} - 10\\mathbf{j}\\text{ N}\\)", c: true },
-                { t: "\\(\\mathbf{F}_3 = 10\\mathbf{i} + 20\\mathbf{j}\\text{ N}\\)", c: false }
-            ]},
+    const BLOQUES = [
+ {
+  "titulo": "Unidades, conversión y peso",
+  "ref": "Capítulo 1 · unidades, conversión (tabla 1.2) y peso",
+  "preguntas": [
+   {
+    "tipo": "teoria",
+    "texto": "Un astronauta tiene una masa de \\(70.0\\ \\text{kg}\\) en la Tierra. En la Luna, donde la aceleración de la gravedad es de \\(1.62\\ \\text{m/s}^2\\), su masa es:",
+    "opciones": [
+     "\\(424\\ \\text{kg}\\)",
+     "depende de a qué altura sobre la Luna se mida",
+     "\\(11.6\\ \\text{kg}\\), porque la gravedad es menor",
+     "\\(70.0\\ \\text{kg}\\), igual que en la Tierra"
+    ],
+    "correcta": 3,
+    "idea": "La <b>masa<\/b> mide cuánta materia tiene el cuerpo y no cambia de lugar a lugar. Lo que cambia es el <b>peso<\/b>, \\(W = mg\\): en la Luna pesa \\((70.0)(1.62) = 113\\ \\text{N}\\) y en la Tierra \\(687\\ \\text{N}\\).",
+    "id": "1.1",
+    "retro": [
+     "Multiplicó en vez de dividir, y de todos modos la masa no cambia al ir a la Luna.",
+     "La altura cambiaría \\(g\\), y con ella el peso; la masa sigue siendo la misma.",
+     "Ése sería su <b>peso<\/b> expresado como si fuera masa: \\(70.0 \\times 1.62/9.81\\). La masa no depende de \\(g\\).",
+     null
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Una caja tiene una masa de \\(20.0\\ \\text{kg}\\). ¿Cuál es su peso?",
+    "opciones": [
+     "\\(20.0\\ \\text{kg}\\)",
+     "\\(2.04\\ \\text{N}\\)",
+     "\\(20.0\\ \\text{N}\\)",
+     "\\(196\\ \\text{N}\\)"
+    ],
+    "correcta": 3,
+    "idea": "\\(W = mg = (20.0\\ \\text{kg})(9.81\\ \\text{m/s}^2) = 196\\ \\text{N}\\). El peso es una <b>fuerza<\/b>: se reporta en newtons (o en libras), nunca en kilogramos. Es el error que más puntos cuesta cada ciclo.",
+    "id": "1.2",
+    "retro": [
+     "El kilogramo es unidad de <b>masa<\/b>. El peso es una fuerza: \\(W = mg\\), en newtons.",
+     "Dividió entre \\(g\\); el peso es \\(m\\) <b>por<\/b> \\(g\\).",
+     "Faltó multiplicar por \\(g = 9.81\\ \\text{m/s}^2\\).",
+     null
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "En el sistema inglés de Bedford, ¿qué papel tienen la libra y el slug?",
+    "opciones": [
+     "La libra es la unidad de <b>fuerza<\/b> y el slug la de <b>masa<\/b>: \\(1\\ \\text{slug} = 1\\ \\text{lb}\\cdot\\text{s}^2/\\text{pie}\\).",
+     "La libra es la unidad de masa y el slug la de fuerza.",
+     "La libra sirve para masa y para fuerza a la vez, así que no hace falta \\(g\\).",
+     "El slug es otro nombre de la libra: \\(1\\ \\text{slug} = 1\\ \\text{lb}\\)."
+    ],
+    "correcta": 0,
+    "idea": "En el sistema inglés la fuerza (libra) es la unidad básica y la masa es derivada: \\(\\text{lb} = \\text{slug}\\cdot\\text{pie/s}^2\\). Por eso la masa en slugs es \\(m = W/g\\) con \\(g = 32.2\\ \\text{pies/s}^2\\).",
+    "id": "1.3",
+    "retro": [
+     null,
+     "Está al revés: la libra mide fuerza y el slug mide masa.",
+     "En el sistema de Bedford la libra es fuerza. Por eso para pasar de peso a masa hay que dividir entre \\(32.2\\ \\text{pies/s}^2\\).",
+     "Un slug es mucho más que una libra: \\(1\\ \\text{slug} = 1\\ \\text{lb}\\cdot\\text{s}^2/\\text{pie}\\), y equivale a \\(14.59\\ \\text{kg}\\)."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "¿Cuántos pies cuadrados hay en \\(1\\ \\text{m}^2\\)? (\\(1\\ \\text{pie} = 0.3048\\ \\text{m}\\))",
+    "opciones": [
+     "\\(35.3\\)",
+     "\\(0.0929\\)",
+     "\\(3.28\\)",
+     "\\(10.8\\)"
+    ],
+    "correcta": 3,
+    "idea": "\\(1\\ \\text{m}^2\\left(\\dfrac{1\\ \\text{pie}}{0.3048\\ \\text{m}}\\right)^2 = 10.8\\ \\text{pie}^2\\). El factor de conversión se eleva a la misma potencia que la unidad: al cuadrado para áreas, al cubo para volúmenes.",
+    "id": "1.4",
+    "retro": [
+     "Elevó al cubo: ése es el factor para volúmenes.",
+     "Es el recíproco: \\(1\\ \\text{pie}^2 = 0.0929\\ \\text{m}^2\\). Se pedía al revés.",
+     "Ése es el factor para longitudes (\\(1/0.3048\\)). En un área se eleva al cuadrado.",
+     null
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Un automóvil pesa \\(3200\\ \\text{lb}\\). Obtenga su masa en kilogramos y en slugs.",
+    "pista": null,
+    "idea": "En newtons: \\(W = (3200)(4.448) = 14\\,234\\ \\text{N}\\), así que \\(m = W/g = 14\\,234/9.81 = 1450\\ \\text{kg}\\). En el sistema inglés: \\(m = W/g = 3200/32.2 = 99.4\\ \\text{slug}\\). Comprobación: \\((99.4)(14.59) = 1450\\ \\text{kg}\\).",
+    "campos": [
+     {
+      "etiqueta": "masa",
+      "unidad": "kg",
+      "valor": 1450.927625
+     },
+     {
+      "etiqueta": "masa",
+      "unidad": "slug",
+      "valor": 99.378882
+     }
+    ],
+    "id": "1.5",
+    "ayuda": "En SI: pase las libras a newtons y divida entre \\(9.81\\ \\text{m/s}^2\\). En slugs: divida las libras entre \\(32.2\\ \\text{pies/s}^2\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 326.197757,
+      "mensaje": "Dividió libras entre \\(9.81\\ \\text{m/s}^2\\): mezcló sistemas. Primero pase el peso a newtons."
+     },
+     {
+      "campo": 0,
+      "valor": 14233.6,
+      "mensaje": "Ése es el peso en newtons; falta dividir entre \\(g\\) para obtener la masa."
+     },
+     {
+      "campo": 1,
+      "valor": 103040.0,
+      "mensaje": "Multiplicó por \\(g\\); la masa es \\(W/g\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 326.197757,
+      "mensaje": "Con el peso en libras, \\(g\\) va en pies/s²: \\(32.2\\), no \\(9.81\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Un neumático está inflado a \\(150\\ \\text{lb/pulg}^2\\). Exprese esa presión en kilopascales (\\(1\\ \\text{kPa} = 1000\\ \\text{N/m}^2\\); \\(1\\ \\text{pulg} = 0.0254\\ \\text{m}\\)).",
+    "pista": null,
+    "idea": "\\(150\\ \\dfrac{\\text{lb}}{\\text{pulg}^2}\\cdot\\dfrac{4.448\\ \\text{N}}{1\\ \\text{lb}}\\cdot\\left(\\dfrac{1\\ \\text{pulg}}{0.0254\\ \\text{m}}\\right)^2 = 1.034\\times10^{6}\\ \\text{N/m}^2 \\approx 1030\\ \\text{kPa}\\). La pulgada va <b>al cuadrado<\/b>.",
+    "campos": [
+     {
+      "etiqueta": "\\(p\\)",
+      "unidad": "kPa",
+      "valor": 1034.162068
+     }
+    ],
+    "id": "1.6",
+    "ayuda": "Convierta libras a newtons (\\(\\times 4.448\\)) y \\(\\text{pulg}^2\\) a \\(\\text{m}^2\\) (\\(\\div 0.0254^2\\)); al final, pase de pascales a kilopascales.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 26.267717,
+      "mensaje": "Convirtió las pulgadas sin elevar al cuadrado: el área es \\(\\text{pulg}^2\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 232.500465,
+      "mensaje": "Faltó convertir las libras a newtons."
+     },
+     {
+      "campo": 0,
+      "valor": 1034162.068324,
+      "mensaje": "Ése es el valor en pascales; divida entre 1000 para kilopascales."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Una llave aplica un par de \\(50.0\\ \\text{N}\\cdot\\text{m}\\). Expréselo en \\(\\text{lb}\\cdot\\text{pie}\\).",
+    "pista": null,
+    "idea": "\\(50.0\\ \\text{N}\\cdot\\text{m}\\cdot\\dfrac{1\\ \\text{lb}}{4.448\\ \\text{N}}\\cdot\\dfrac{1\\ \\text{pie}}{0.3048\\ \\text{m}} = 36.9\\ \\text{lb}\\cdot\\text{pie}\\). Escriba los factores como fracciones y verifique que las unidades se cancelen.",
+    "campos": [
+     {
+      "etiqueta": "par",
+      "unidad": "lb·pie",
+      "valor": 36.879945
+     }
+    ],
+    "id": "1.7",
+    "ayuda": "Divida entre \\(4.448\\ \\text{N/lb}\\) y entre \\(0.3048\\ \\text{m/pie}\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 67.78752,
+      "mensaje": "Multiplicó por los factores en vez de dividir: las unidades no se cancelan."
+     },
+     {
+      "campo": 0,
+      "valor": 3.426259,
+      "mensaje": "El factor de longitud está invertido: se pasa de metros a pies dividiendo entre \\(0.3048\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 729.658793,
+      "mensaje": "El factor de fuerza está invertido: se pasa de newtons a libras dividiendo entre \\(4.448\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Un cilindro tiene una masa de \\(25.0\\ \\text{kg}\\). Obtenga su peso en newtons y en libras.",
+    "pista": null,
+    "idea": "\\(W = mg = (25.0)(9.81) = 245\\ \\text{N}\\), y \\(245.3\\ \\text{N}\\cdot\\dfrac{1\\ \\text{lb}}{4.448\\ \\text{N}} = 55.1\\ \\text{lb}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(W\\)",
+      "unidad": "N",
+      "valor": 245.25
+     },
+     {
+      "etiqueta": "\\(W\\)",
+      "unidad": "lb",
+      "valor": 55.13714
+     }
+    ],
+    "id": "1.8",
+    "ayuda": "\\(W = mg\\) en newtons; después divida entre \\(4.448\\ \\text{N/lb}\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 25.0,
+      "mensaje": "Ésa es la masa. El peso es \\(mg\\), en newtons."
+     },
+     {
+      "campo": 0,
+      "valor": 2.54842,
+      "mensaje": "Dividió entre \\(g\\); el peso es \\(m\\) por \\(g\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 1090.872,
+      "mensaje": "De newtons a libras se <b>divide<\/b> entre \\(4.448\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 805.0,
+      "mensaje": "Multiplicó kilogramos por \\(32.2\\ \\text{pies/s}^2\\): mezcló sistemas."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "titulo": "Suma de vectores y componentes en el plano",
+  "ref": "Capítulo 2 · §§2.1–2.2",
+  "preguntas": [
+   {
+    "tipo": "teoria",
+    "texto": "Se suman dos fuerzas de \\(30.0\\ \\text{N}\\) y \\(40.0\\ \\text{N}\\). La magnitud de la resultante:",
+    "opciones": [
+     "puede valer cualquier cosa entre \\(10.0\\ \\text{N}\\) y \\(70.0\\ \\text{N}\\), según el ángulo entre ellas",
+     "nunca es menor que \\(40.0\\ \\text{N}\\)",
+     "es siempre \\(50.0\\ \\text{N}\\)",
+     "es siempre \\(70.0\\ \\text{N}\\)"
+    ],
+    "correcta": 0,
+    "idea": "\\(|\\mathbf{U}+\\mathbf{V}| \\ne |\\mathbf{U}| + |\\mathbf{V}|\\) salvo que sean paralelas. Si tienen el mismo sentido da \\(70.0\\ \\text{N}\\); si son opuestas, \\(10.0\\ \\text{N}\\); si son perpendiculares, \\(50.0\\ \\text{N}\\).",
+    "id": "2.1",
+    "retro": [
+     null,
+     "Si apuntan en sentidos opuestos, la resultante es \\(40.0 - 30.0 = 10.0\\ \\text{N}\\).",
+     "Sólo si son perpendiculares (triángulo 3-4-5).",
+     "Sólo si las dos fuerzas son paralelas y del mismo sentido. En general se suman como vectores."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Dos vectores \\(\\mathbf{U}\\) y \\(\\mathbf{V}\\) forman un ángulo \\(\\theta\\) cuando se dibujan cola con cola. En el triángulo que se arma al ponerlos punta con cola, el ángulo interior opuesto a \\(\\mathbf{U}+\\mathbf{V}\\) es:",
+    "opciones": [
+     "\\(90^\\circ - \\theta\\)",
+     "\\(180^\\circ - \\theta\\)",
+     "\\(\\theta\\)",
+     "\\(2\\theta\\)"
+    ],
+    "correcta": 1,
+    "idea": "Al trasladar \\(\\mathbf{V}\\) a la punta de \\(\\mathbf{U}\\), el ángulo interior es el suplemento: \\(180^\\circ - \\theta\\). Por eso la ley de cosenos queda \\(|\\mathbf{U}+\\mathbf{V}|^2 = |\\mathbf{U}|^2 + |\\mathbf{V}|^2 - 2|\\mathbf{U}||\\mathbf{V}|\\cos(180^\\circ-\\theta) = |\\mathbf{U}|^2 + |\\mathbf{V}|^2 + 2|\\mathbf{U}||\\mathbf{V}|\\cos\\theta\\). Dibuje el triángulo antes de usarla.",
+    "id": "2.2",
+    "retro": [
+     "No hay razón para el complemento. Dibuje el triángulo: la línea de \\(\\mathbf{U}\\) prolongada muestra el ángulo \\(\\theta\\) por fuera.",
+     null,
+     "\\(\\theta\\) es el ángulo cola con cola. Al poner los vectores punta con cola el ángulo interior es su suplemento.",
+     "El ángulo interior no se duplica: es el suplemento de \\(\\theta\\)."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Sobre el vector unitario \\(\\mathbf{e} = \\mathbf{U}/|\\mathbf{U}|\\), ¿cuál afirmación es correcta?",
+    "opciones": [
+     "Sólo se puede definir si \\(\\mathbf{U}\\) está sobre un eje coordenado.",
+     "Mide 1, no tiene unidades y apunta en la dirección de \\(\\mathbf{U}\\).",
+     "Tiene las mismas unidades que \\(\\mathbf{U}\\).",
+     "Sus componentes siempre suman 1."
+    ],
+    "correcta": 1,
+    "idea": "Al dividir \\(\\mathbf{U}\\) entre su magnitud se cancelan las unidades y queda un vector de magnitud 1 que sólo guarda la <b>dirección<\/b>. Lo que vale 1 es la suma de los <b>cuadrados<\/b> de sus componentes.",
+    "id": "2.3",
+    "retro": [
+     "Cualquier vector distinto de cero tiene su unitario, esté donde esté.",
+     null,
+     "Al dividir entre \\(|\\mathbf{U}|\\) las unidades se cancelan: \\(\\mathbf{e}\\) es adimensional.",
+     "Lo que suma 1 es la suma de los <b>cuadrados<\/b> de sus componentes. Ejemplo: \\(0.6\\,\\mathbf{i} + 0.8\\,\\mathbf{j}\\)."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Una fuerza de \\(100\\ \\text{N}\\) apunta \\(30^\\circ\\) por debajo del eje \\(-x\\) (hacia abajo y a la izquierda). Sus componentes son:",
+    "opciones": [
+     "\\(F_x = 86.6\\ \\text{N}\\), \\(F_y = 50.0\\ \\text{N}\\)",
+     "\\(F_x = -86.6\\ \\text{N}\\), \\(F_y = 50.0\\ \\text{N}\\)",
+     "\\(F_x = -86.6\\ \\text{N}\\), \\(F_y = -50.0\\ \\text{N}\\)",
+     "\\(F_x = -50.0\\ \\text{N}\\), \\(F_y = -86.6\\ \\text{N}\\)"
+    ],
+    "correcta": 2,
+    "idea": "El ángulo de \\(30^\\circ\\) se mide desde el eje \\(x\\), así que el coseno va con \\(F_x\\): \\(|F_x| = 100\\cos30^\\circ = 86.6\\ \\text{N}\\) y \\(|F_y| = 100\\operatorname{sen}30^\\circ = 50.0\\ \\text{N}\\). Los signos se leen del dibujo: a la izquierda y hacia abajo, las dos negativas.",
+    "id": "2.4",
+    "retro": [
+     "Los signos no se leen del ángulo sino del dibujo: apunta a la izquierda y hacia abajo.",
+     "Apunta hacia <b>abajo<\/b>: \\(F_y\\) es negativa.",
+     null,
+     "Intercambió seno y coseno: el ángulo se mide desde el eje \\(x\\), así que el coseno va con \\(F_x\\)."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Tres fuerzas cumplen \\(\\mathbf{F}_1 + \\mathbf{F}_2 + \\mathbf{F}_3 = \\mathbf{0}\\). Si se dibujan punta con cola, forman:",
+    "opciones": [
+     "tres vectores forzosamente paralelos",
+     "un triángulo cerrado: la punta de la última cae en la cola de la primera",
+     "un triángulo abierto cuyo lado faltante es la resultante",
+     "nada en particular: sólo significa que las magnitudes suman cero"
+    ],
+    "correcta": 1,
+    "idea": "Si la suma es cero, al recorrer los tres vectores se regresa al punto de partida: el polígono se cierra. Así se resuelven con la ley de senos o de cosenos los problemas en que se pide la tercera fuerza.",
+    "id": "2.5",
+    "retro": [
+     "Tres vectores paralelos sólo suman cero en casos especiales; en general forman un triángulo.",
+     null,
+     "Si queda un lado abierto, la suma <b>no<\/b> es cero: ese lado sería la resultante.",
+     "Las magnitudes nunca suman cero, porque son positivas. Lo que se anula es la suma <b>vectorial<\/b>."
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Una fuerza de \\(600\\ \\text{N}\\) actúa hacia arriba y a la izquierda, a lo largo de una recta que sube \\(3\\) unidades por cada \\(4\\) que avanza hacia la izquierda. Obtenga sus componentes.",
+    "pista": null,
+    "idea": "El triángulo 3-4-5 da la dirección sin calcular ángulos: \\(F_x = -600\\cdot\\tfrac45 = -480\\ \\text{N}\\) y \\(F_y = +600\\cdot\\tfrac35 = 360\\ \\text{N}\\). Comprobación: \\(\\sqrt{480^2 + 360^2} = 600\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(F_x\\)",
+      "unidad": "N",
+      "valor": -480.0
+     },
+     {
+      "etiqueta": "\\(F_y\\)",
+      "unidad": "N",
+      "valor": 360.0
+     }
+    ],
+    "id": "2.6",
+    "ayuda": "En el triángulo 3-4-5, la componente horizontal va con el 4 y la vertical con el 3; los signos, del dibujo.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": -360.0,
+      "mensaje": "Intercambió las componentes: la recta avanza 4 en horizontal, así que \\(|F_x| = 600\\cdot\\tfrac45\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 480.0,
+      "mensaje": "Intercambió las componentes: la recta sube 3, así que \\(|F_y| = 600\\cdot\\tfrac35\\)."
+     },
+     {
+      "campo": 0,
+      "valor": -800.0,
+      "mensaje": "Divida entre la hipotenusa (5), no entre el otro cateto."
+     },
+     {
+      "campo": 1,
+      "valor": 450.0,
+      "mensaje": "Divida entre la hipotenusa (5), no entre el otro cateto."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{F}_A\\) mide \\(250\\ \\text{N}\\) a \\(30.0^\\circ\\) y \\(\\mathbf{F}_B\\) mide \\(180\\ \\text{N}\\) a \\(135^\\circ\\) (ángulos desde \\(+x\\), antihorario). Obtenga la magnitud y la dirección de \\(\\mathbf{R} = \\mathbf{F}_A + \\mathbf{F}_B\\).",
+    "pista": null,
+    "idea": "\\(R_x = 250\\cos30^\\circ + 180\\cos135^\\circ = 216.5 - 127.3 = 89.2\\ \\text{N}\\); \\(R_y = 250\\operatorname{sen}30^\\circ + 180\\operatorname{sen}135^\\circ = 125.0 + 127.3 = 252.3\\ \\text{N}\\). \\(|\\mathbf{R}| = \\sqrt{89.2^2 + 252.3^2} = 268\\ \\text{N}\\) y \\(\\theta = \\arctan(252.3/89.2) = 70.5^\\circ\\) (primer cuadrante).",
+    "campos": [
+     {
+      "etiqueta": "\\(|\\mathbf{R}|\\)",
+      "unidad": "N",
+      "valor": 267.593509
+     },
+     {
+      "etiqueta": "\\(\\theta\\)",
+      "unidad": "°",
+      "valor": 70.522126
+     }
+    ],
+    "id": "2.7",
+    "ayuda": "Sume componentes, \\(R_x = \\sum F_x\\) y \\(R_y = \\sum F_y\\); luego \\(|\\mathbf{R}| = \\sqrt{R_x^2 + R_y^2}\\) y el ángulo, mirando el cuadrante.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 430,
+      "mensaje": "Sumó magnitudes, pero las fuerzas no son paralelas: hay que sumar componentes."
+     },
+     {
+      "campo": 1,
+      "valor": 19.477874,
+      "mensaje": "Ése es el ángulo medido desde el eje \\(y\\). Se pide desde \\(+x\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Se invierte la pregunta: \\(|\\mathbf{U}| = 60.0\\ \\text{N}\\), \\(|\\mathbf{V}| = 40.0\\ \\text{N}\\) y su suma mide \\(|\\mathbf{U}+\\mathbf{V}| = 80.0\\ \\text{N}\\). ¿Qué ángulo \\(\\theta\\) forman \\(\\mathbf{U}\\) y \\(\\mathbf{V}\\) dibujados cola con cola?",
+    "pista": "Dibuje el triángulo punta-cola: el ángulo interior opuesto a la resultante no es \\(\\theta\\).",
+    "idea": "\\(80.0^2 = 60.0^2 + 40.0^2 + 2(60.0)(40.0)\\cos\\theta \\Rightarrow \\cos\\theta = \\dfrac{6400 - 5200}{4800} = 0.250 \\Rightarrow \\theta = 75.5^\\circ\\). El ángulo interior del triángulo punta-cola es \\(180^\\circ - 75.5^\\circ = 104.5^\\circ\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(\\theta\\)",
+      "unidad": "°",
+      "valor": 75.522488
+     }
+    ],
+    "id": "2.8",
+    "ayuda": "Ley de cosenos con el ángulo interior \\(180^\\circ - \\theta\\): \\(|\\mathbf{U}+\\mathbf{V}|^2 = |\\mathbf{U}|^2 + |\\mathbf{V}|^2 + 2|\\mathbf{U}||\\mathbf{V}|\\cos\\theta\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 104.477512,
+      "mensaje": "Ése es el ángulo interior del triángulo punta-cola. El ángulo entre los vectores cola con cola es su suplemento."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Obtenga las componentes del vector unitario \\(\\mathbf{e}_{AB}\\) que apunta del punto \\(A\\,(2,\\,1)\\ \\text{m}\\) al punto \\(B\\,(-4,\\,9)\\ \\text{m}\\).",
+    "pista": null,
+    "idea": "\\(\\mathbf{r}_{AB} = (x_B - x_A)\\mathbf{i} + (y_B - y_A)\\mathbf{j} = -6\\mathbf{i} + 8\\mathbf{j}\\ \\text{m}\\), \\(|\\mathbf{r}_{AB}| = 10\\ \\text{m}\\). \\(\\mathbf{e}_{AB} = -0.600\\,\\mathbf{i} + 0.800\\,\\mathbf{j}\\), sin unidades. Comprobación: \\(0.600^2 + 0.800^2 = 1\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(e_x\\)",
+      "unidad": "",
+      "valor": -0.6
+     },
+     {
+      "etiqueta": "\\(e_y\\)",
+      "unidad": "",
+      "valor": 0.8
+     }
+    ],
+    "id": "2.9",
+    "ayuda": "\\(\\mathbf{r}_{AB} = \\mathbf{r}_B - \\mathbf{r}_A\\) y \\(\\mathbf{e}_{AB} = \\mathbf{r}_{AB}/|\\mathbf{r}_{AB}|\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": -6.0,
+      "mensaje": "Ésa es la componente de \\(\\mathbf{r}_{AB}\\); falta dividir entre \\(|\\mathbf{r}_{AB}| = 10\\ \\text{m}\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 8.0,
+      "mensaje": "Ésa es la componente de \\(\\mathbf{r}_{AB}\\); falta dividir entre \\(|\\mathbf{r}_{AB}| = 10\\ \\text{m}\\)."
+     },
+     {
+      "campo": 0,
+      "valor": -0.406138,
+      "mensaje": "Usó las coordenadas de \\(B\\) solas: el vector debe ir de \\(A\\) a \\(B\\), \\(\\mathbf{r}_B - \\mathbf{r}_A\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{F}_A\\) mide \\(500\\ \\text{N}\\) a \\(40.0^\\circ\\) sobre el eje \\(+x\\). \\(\\mathbf{F}_B\\) apunta hacia abajo y a la izquierda, formando \\(20.0^\\circ\\) con la vertical. ¿Qué magnitud debe tener \\(\\mathbf{F}_B\\) para que la resultante sea <b>horizontal<\/b>, y cuánto mide entonces \\(|\\mathbf{R}|\\)?",
+    "pista": "Escriba \\(R_y\\) y póngala igual a cero.",
+    "idea": "Resultante horizontal \\(\\Rightarrow R_y = 0\\): \\(500\\operatorname{sen}40^\\circ - |\\mathbf{F}_B|\\cos20^\\circ = 0 \\Rightarrow |\\mathbf{F}_B| = 321.4/0.9397 = 342\\ \\text{N}\\). El ángulo se mide desde la <b>vertical<\/b>, por eso la componente vertical lleva coseno. \\(R_x = 500\\cos40^\\circ - 342\\operatorname{sen}20^\\circ = 383.0 - 117.0 = 266\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(|\\mathbf{F}_B|\\)",
+      "unidad": "N",
+      "valor": 342.020143
+     },
+     {
+      "etiqueta": "\\(|\\mathbf{R}|\\)",
+      "unidad": "N",
+      "valor": 266.044443
+     }
+    ],
+    "id": "2.10",
+    "ayuda": "Plantee \\(R_y = 0\\). El ángulo de \\(\\mathbf{F}_B\\) se mide desde la vertical: su componente vertical lleva coseno.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 939.692621,
+      "mensaje": "Usó \\(\\operatorname{sen}20^\\circ\\) para la componente vertical, pero los \\(20^\\circ\\) se miden desde la vertical: va el coseno."
+     },
+     {
+      "campo": 1,
+      "valor": 500.0,
+      "mensaje": "\\(\\mathbf{F}_B\\) apunta a la izquierda: su componente horizontal resta."
+     },
+     {
+      "campo": 1,
+      "valor": 383.022222,
+      "mensaje": "Faltó la componente horizontal de \\(\\mathbf{F}_B\\)."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "titulo": "Componentes en el espacio y fuerza entre dos puntos",
+  "ref": "Capítulo 2 · §2.3",
+  "preguntas": [
+   {
+    "tipo": "teoria",
+    "texto": "Un vector tiene \\(\\theta_x = 60^\\circ\\) y \\(\\theta_y = 60^\\circ\\). ¿Cuánto vale \\(\\theta_z\\)?",
+    "opciones": [
+     "\\(45^\\circ\\), forzosamente",
+     "\\(60^\\circ\\)",
+     "\\(45^\\circ\\) o \\(135^\\circ\\): las dos cumplen, y decide el signo de \\(U_z\\)",
+     "no existe, porque los ángulos pasarían de \\(180^\\circ\\)"
+    ],
+    "correcta": 2,
+    "idea": "\\(\\cos^2\\theta_x + \\cos^2\\theta_y + \\cos^2\\theta_z = 1 \\Rightarrow \\cos^2\\theta_z = 1 - 0.25 - 0.25 = 0.5\\), así que \\(\\cos\\theta_z = \\pm 0.707\\): \\(45^\\circ\\) si \\(U_z > 0\\) y \\(135^\\circ\\) si \\(U_z < 0\\). El enunciado o la figura deben decir cuál.",
+    "id": "3.1",
+    "retro": [
+     "\\(\\cos\\theta_z = -0.707\\) también cumple: la raíz tiene dos signos.",
+     "\\(\\cos^2 60^\\circ\\) tres veces da \\(0.75\\), no 1.",
+     null,
+     "Los ángulos directores no suman \\(180^\\circ\\): lo que se cumple es \\(\\cos^2\\theta_x + \\cos^2\\theta_y + \\cos^2\\theta_z = 1\\)."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "¿Puede un vector tener \\(\\theta_x = 30^\\circ\\) y \\(\\theta_y = 30^\\circ\\)?",
+    "opciones": [
+     "Sí: cualquier par de ángulos tiene un tercero que lo completa",
+     "Sí, con \\(\\theta_z = 90^\\circ\\)",
+     "No: \\(\\cos^2 30^\\circ + \\cos^2 30^\\circ = 1.5\\), que ya pasa de 1",
+     "Sí, con \\(\\theta_z = 120^\\circ\\)"
+    ],
+    "correcta": 2,
+    "idea": "Los cosenos directores son las componentes de un vector unitario: la suma de sus cuadrados debe ser 1. Con \\(0.75 + 0.75 = 1.5 > 1\\) no hay \\(\\theta_z\\) que lo arregle. Es una buena comprobación rápida en el examen.",
+    "id": "3.2",
+    "retro": [
+     "No siempre: si \\(\\cos^2\\theta_x + \\cos^2\\theta_y\\) ya pasa de 1, no hay tercer ángulo posible.",
+     "Con \\(\\theta_z = 90^\\circ\\), la suma da \\(1.5\\), no 1.",
+     null,
+     "Con \\(\\theta_z = 120^\\circ\\), la suma de cosenos al cuadrado da \\(1.75\\), no 1."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Un cable une el punto \\(A\\) con el punto \\(B\\) y <b>tira de \\(A\\) hacia \\(B\\)<\/b> con tensión \\(T\\). La fuerza que el cable ejerce sobre \\(A\\) es:",
+    "opciones": [
+     "\\(T\\,\\dfrac{\\mathbf{r}_B}{|\\mathbf{r}_B|}\\)",
+     "\\(T\\,\\dfrac{\\mathbf{r}_B - \\mathbf{r}_A}{|\\mathbf{r}_B - \\mathbf{r}_A|}\\)",
+     "\\(T\\,\\dfrac{\\mathbf{r}_A - \\mathbf{r}_B}{|\\mathbf{r}_A - \\mathbf{r}_B|}\\)",
+     "\\(T\\,(\\mathbf{r}_B - \\mathbf{r}_A)\\)"
+    ],
+    "correcta": 1,
+    "idea": "\\(\\mathbf{F} = T\\,\\mathbf{e}_{AB}\\), con \\(\\mathbf{e}_{AB} = \\mathbf{r}_{AB}/|\\mathbf{r}_{AB}|\\) y \\(\\mathbf{r}_{AB} = \\mathbf{r}_B - \\mathbf{r}_A\\) (<b>destino menos origen<\/b>). Se multiplica la magnitud por el <b>unitario<\/b>, no por el vector de posición.",
+    "id": "3.3",
+    "retro": [
+     "\\(\\mathbf{r}_B\\) sale del origen, no de \\(A\\). La dirección del cable es \\(\\mathbf{r}_B - \\mathbf{r}_A\\).",
+     null,
+     "Ése apunta de \\(B\\) hacia \\(A\\): es la fuerza que el cable ejerce sobre \\(B\\), no sobre \\(A\\).",
+     "Faltó dividir entre \\(|\\mathbf{r}_{AB}|\\): así la fuerza tendría unidades de \\(\\text{N}\\cdot\\text{m}\\) y la magnitud equivocada."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Las componentes del vector unitario \\(\\mathbf{e}\\) en la dirección de \\(\\mathbf{U}\\) son:",
+    "opciones": [
+     "las componentes de \\(\\mathbf{U}\\) divididas entre 3",
+     "los ángulos directores \\(\\theta_x,\\ \\theta_y,\\ \\theta_z\\)",
+     "los cosenos directores: \\(\\mathbf{e} = \\cos\\theta_x\\,\\mathbf{i} + \\cos\\theta_y\\,\\mathbf{j} + \\cos\\theta_z\\,\\mathbf{k}\\)",
+     "las coordenadas del punto donde termina \\(\\mathbf{U}\\)"
+    ],
+    "correcta": 2,
+    "idea": "Como \\(U_x = |\\mathbf{U}|\\cos\\theta_x\\) (y lo mismo en \\(y\\) y \\(z\\)), al dividir \\(\\mathbf{U}\\) entre \\(|\\mathbf{U}|\\) quedan los cosenos directores. Por eso \\(\\cos^2\\theta_x + \\cos^2\\theta_y + \\cos^2\\theta_z = 1\\).",
+    "id": "3.4",
+    "retro": [
+     "No: cada componente se divide entre la magnitud \\(|\\mathbf{U}|\\).",
+     "Los ángulos no son componentes; sus <b>cosenos<\/b> sí.",
+     null,
+     "Las coordenadas del punto final sólo coinciden con las componentes si el vector sale del origen, y aun así no miden 1."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Si un vector \\(\\mathbf{U}\\) (distinto de cero) tiene \\(\\theta_x = 90^\\circ\\), entonces:",
+    "opciones": [
+     "apunta en la dirección del eje \\(x\\)",
+     "\\(\\mathbf{U}\\) tiene que ser cero",
+     "\\(U_x = |\\mathbf{U}|\\)",
+     "\\(U_x = 0\\): \\(\\mathbf{U}\\) es perpendicular al eje \\(x\\)"
+    ],
+    "correcta": 3,
+    "idea": "\\(U_x = |\\mathbf{U}|\\cos 90^\\circ = 0\\). El vector vive en un plano paralelo al plano \\(yz\\). Si apuntara a lo largo de \\(x\\), sería \\(\\theta_x = 0^\\circ\\) (o \\(180^\\circ\\)).",
+    "id": "3.5",
+    "retro": [
+     "Si apuntara a lo largo de \\(x\\), sería \\(\\theta_x = 0^\\circ\\) o \\(180^\\circ\\).",
+     "\\(\\theta_x = 90^\\circ\\) sólo anula la componente \\(x\\); las otras pueden ser distintas de cero.",
+     "Eso pasa con \\(\\theta_x = 0^\\circ\\), porque \\(\\cos 0^\\circ = 1\\).",
+     null
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{U} = (20\\,\\mathbf{i} - 40\\,\\mathbf{j} + 40\\,\\mathbf{k})\\ \\text{N}\\). Calcule su magnitud y su ángulo director \\(\\theta_y\\).",
+    "pista": null,
+    "idea": "\\(|\\mathbf{U}| = \\sqrt{20^2 + (-40)^2 + 40^2} = \\sqrt{3600} = 60.0\\ \\text{N}\\). \\(\\cos\\theta_y = U_y/|\\mathbf{U}| = -40/60 = -0.667 \\Rightarrow \\theta_y = 131.8^\\circ\\). Los ángulos directores van de \\(0^\\circ\\) a \\(180^\\circ\\): una componente negativa da un ángulo obtuso.",
+    "campos": [
+     {
+      "etiqueta": "\\(|\\mathbf{U}|\\)",
+      "unidad": "N",
+      "valor": 60.0
+     },
+     {
+      "etiqueta": "\\(\\theta_y\\)",
+      "unidad": "°",
+      "valor": 131.810315
+     }
+    ],
+    "id": "3.6",
+    "ayuda": "\\(|\\mathbf{U}| = \\sqrt{U_x^2 + U_y^2 + U_z^2}\\) y \\(\\cos\\theta_y = U_y/|\\mathbf{U}|\\), con el signo de \\(U_y\\).",
+    "errores": [
+     {
+      "campo": 1,
+      "valor": 48.189685,
+      "mensaje": "Perdió el signo de \\(U_y\\): con \\(U_y < 0\\), \\(\\theta_y\\) es obtuso."
+     },
+     {
+      "campo": 1,
+      "valor": 70.528779,
+      "mensaje": "Ése es \\(\\theta_x\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 20,
+      "mensaje": "Sumó las componentes; la magnitud sale con la raíz de la suma de cuadrados."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Una fuerza de \\(900\\ \\text{N}\\) actúa a lo largo de la recta que va de \\(A\\,(1,\\,2,\\,0)\\ \\text{m}\\) a \\(B\\,(5,\\,-2,\\,7)\\ \\text{m}\\), en el sentido de \\(A\\) hacia \\(B\\). Obtenga sus componentes.",
+    "pista": null,
+    "idea": "\\(\\mathbf{r}_{AB} = (5-1)\\mathbf{i} + (-2-2)\\mathbf{j} + (7-0)\\mathbf{k} = 4\\mathbf{i} - 4\\mathbf{j} + 7\\mathbf{k}\\ \\text{m}\\), \\(|\\mathbf{r}_{AB}| = \\sqrt{16+16+49} = 9\\ \\text{m}\\). \\(\\mathbf{F} = 900\\,\\dfrac{\\mathbf{r}_{AB}}{9} = 400\\,\\mathbf{i} - 400\\,\\mathbf{j} + 700\\,\\mathbf{k}\\ \\text{N}\\), es decir, \\(F_x = 400\\), \\(F_y = -400\\) y \\(F_z = 700\\ \\text{N}\\). Comprobación: \\(\\sqrt{400^2 + 400^2 + 700^2} = 900\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(F_x\\)",
+      "unidad": "N",
+      "valor": 400.0
+     },
+     {
+      "etiqueta": "\\(F_y\\)",
+      "unidad": "N",
+      "valor": -400.0
+     },
+     {
+      "etiqueta": "\\(F_z\\)",
+      "unidad": "N",
+      "valor": 700.0
+     }
+    ],
+    "id": "3.7",
+    "ayuda": "\\(\\mathbf{r}_{AB} = \\mathbf{r}_B - \\mathbf{r}_A\\), \\(\\mathbf{e}_{AB} = \\mathbf{r}_{AB}/|\\mathbf{r}_{AB}|\\) y \\(\\mathbf{F} = 900\\,\\mathbf{e}_{AB}\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 3600,
+      "mensaje": "Multiplicó \\(900\\ \\text{N}\\) por \\(\\mathbf{r}_{AB}\\) sin dividir entre \\(|\\mathbf{r}_{AB}| = 9\\ \\text{m}\\)."
+     },
+     {
+      "campo": 1,
+      "valor": -3600,
+      "mensaje": "Multiplicó \\(900\\ \\text{N}\\) por \\(\\mathbf{r}_{AB}\\) sin dividir entre \\(|\\mathbf{r}_{AB}| = 9\\ \\text{m}\\)."
+     },
+     {
+      "campo": 2,
+      "valor": 6300,
+      "mensaje": "Multiplicó \\(900\\ \\text{N}\\) por \\(\\mathbf{r}_{AB}\\) sin dividir entre \\(|\\mathbf{r}_{AB}| = 9\\ \\text{m}\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 509.524665,
+      "mensaje": "Usó las coordenadas de \\(B\\) solas; el vector va de \\(A\\) a \\(B\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Una fuerza de \\(500\\ \\text{N}\\) tiene \\(\\theta_x = 50.0^\\circ\\) y \\(\\theta_y = 70.0^\\circ\\), y \\(\\theta_z\\) es agudo. Obtenga \\(\\theta_z\\) y la componente \\(F_z\\).",
+    "pista": null,
+    "idea": "\\(\\cos^2\\theta_z = 1 - \\cos^2 50.0^\\circ - \\cos^2 70.0^\\circ = 1 - 0.4132 - 0.1170 = 0.4698\\), y como es agudo, \\(\\cos\\theta_z = +0.6855 \\Rightarrow \\theta_z = 46.7^\\circ\\). \\(F_z = 500\\cos\\theta_z = 343\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(\\theta_z\\)",
+      "unidad": "°",
+      "valor": 46.728728
+     },
+     {
+      "etiqueta": "\\(F_z\\)",
+      "unidad": "N",
+      "valor": 342.726681
+     }
+    ],
+    "id": "3.8",
+    "ayuda": "\\(\\cos^2\\theta_x + \\cos^2\\theta_y + \\cos^2\\theta_z = 1\\); con \\(\\theta_z\\) agudo, tome la raíz positiva. \\(F_z = |\\mathbf{F}|\\cos\\theta_z\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 60.0,
+      "mensaje": "Los ángulos directores no suman \\(180^\\circ\\): use la suma de cosenos al cuadrado."
+     },
+     {
+      "campo": 1,
+      "valor": 250.0,
+      "mensaje": "Usó \\(\\theta_z = 60^\\circ\\): los ángulos directores no suman \\(180^\\circ\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 133.271272,
+      "mensaje": "Ésa es la solución obtusa; el enunciado pide \\(\\theta_z\\) agudo."
+     },
+     {
+      "campo": 1,
+      "valor": 413.960554,
+      "mensaje": "Faltó sacar raíz: \\(0.4698\\) es \\(\\cos^2\\theta_z\\), no \\(\\cos\\theta_z\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{F}_1\\) mide \\(300\\ \\text{N}\\) y apunta del origen hacia el punto \\((3,\\,4,\\,12)\\ \\text{m}\\); \\(\\mathbf{F}_2 = (-100\\,\\mathbf{i} + 50\\,\\mathbf{j} - 80\\,\\mathbf{k})\\ \\text{N}\\). Obtenga la magnitud de la resultante.",
+    "pista": null,
+    "idea": "\\(|\\mathbf{r}| = \\sqrt{9+16+144} = 13\\ \\text{m}\\), así que \\(\\mathbf{F}_1 = \\tfrac{300}{13}(3\\mathbf{i}+4\\mathbf{j}+12\\mathbf{k}) = 69.2\\,\\mathbf{i} + 92.3\\,\\mathbf{j} + 276.9\\,\\mathbf{k}\\ \\text{N}\\). \\(\\mathbf{R} = -30.8\\,\\mathbf{i} + 142.3\\,\\mathbf{j} + 196.9\\,\\mathbf{k}\\ \\text{N}\\) y \\(|\\mathbf{R}| = \\sqrt{30.8^2 + 142.3^2 + 196.9^2} = 245\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(|\\mathbf{R}|\\)",
+      "unidad": "N",
+      "valor": 244.901864
+     }
+    ],
+    "id": "3.9",
+    "ayuda": "Escriba \\(\\mathbf{F}_1 = 300\\,\\mathbf{e}\\) con \\(\\mathbf{e} = \\mathbf{r}/13\\); sume componente a componente y saque la magnitud.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 437.477271,
+      "mensaje": "Sumó magnitudes; las fuerzas no son paralelas."
+     },
+     {
+      "campo": 0,
+      "valor": 3820.065444,
+      "mensaje": "Multiplicó \\(300\\ \\text{N}\\) por el vector de posición sin dividir entre \\(13\\ \\text{m}\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Se invierte la pregunta: \\(\\mathbf{F} = F_x\\,\\mathbf{i} + 120\\,\\mathbf{j} + 160\\,\\mathbf{k}\\ \\text{N}\\) mide \\(250\\ \\text{N}\\) y su ángulo \\(\\theta_x\\) es obtuso. Obtenga \\(F_x\\) y \\(\\theta_x\\).",
+    "pista": "Use \\(|\\mathbf{F}|^2 = F_x^2 + F_y^2 + F_z^2\\) y elija el signo con el dato del ángulo.",
+    "idea": "\\(F_x^2 = 250^2 - 120^2 - 160^2 = 22\\,500 \\Rightarrow F_x = \\pm150\\ \\text{N}\\). Con \\(\\theta_x\\) obtuso, \\(\\cos\\theta_x < 0\\): \\(F_x = -150\\ \\text{N}\\) y \\(\\theta_x = \\arccos(-150/250) = 126.9^\\circ\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(F_x\\)",
+      "unidad": "N",
+      "valor": -150.0
+     },
+     {
+      "etiqueta": "\\(\\theta_x\\)",
+      "unidad": "°",
+      "valor": 126.869898
+     }
+    ],
+    "id": "3.10",
+    "ayuda": "\\(F_x^2 = |\\mathbf{F}|^2 - F_y^2 - F_z^2\\); el signo de \\(F_x\\) lo decide \\(\\theta_x\\) obtuso.",
+    "errores": [
+     {
+      "campo": 1,
+      "valor": 53.130102,
+      "mensaje": "Ese ángulo es agudo; con \\(\\theta_x\\) obtuso, \\(F_x\\) es negativa y \\(\\cos\\theta_x = -0.6\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 30,
+      "mensaje": "Las componentes no se restan de la magnitud: se usan sus cuadrados."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "titulo": "Producto punto: ángulos y proyecciones",
+  "ref": "Capítulo 2 · §2.4",
+  "preguntas": [
+   {
+    "tipo": "teoria",
+    "texto": "Si \\(\\mathbf{U}\\cdot\\mathbf{V} = 0\\) y ninguno de los dos es cero, entonces \\(\\mathbf{U}\\) y \\(\\mathbf{V}\\):",
+    "opciones": [
+     "apuntan en sentidos opuestos",
+     "tienen la misma magnitud",
+     "son perpendiculares",
+     "son paralelos"
+    ],
+    "correcta": 2,
+    "idea": "\\(\\mathbf{U}\\cdot\\mathbf{V} = |\\mathbf{U}||\\mathbf{V}|\\cos\\theta\\). Con magnitudes distintas de cero, el producto sólo se anula si \\(\\cos\\theta = 0\\), es decir, \\(\\theta = 90^\\circ\\). Es la prueba de perpendicularidad.",
+    "id": "4.1",
+    "retro": [
+     "En sentidos opuestos, \\(\\cos180^\\circ = -1\\) y el producto sería negativo, no cero.",
+     "El producto punto no compara magnitudes; se anula por el ángulo.",
+     null,
+     "Para paralelos, \\(|\\mathbf{U}\\cdot\\mathbf{V}| = |\\mathbf{U}||\\mathbf{V}|\\), no cero. La prueba de paralelismo es el producto cruz."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "El producto punto \\(\\mathbf{F}\\cdot\\mathbf{r}\\), con \\(\\mathbf{F}\\) en newtons y \\(\\mathbf{r}\\) en metros, da:",
+    "opciones": [
+     "un escalar sin unidades",
+     "un vector perpendicular a \\(\\mathbf{F}\\) y a \\(\\mathbf{r}\\)",
+     "un vector, en \\(\\text{N}\\cdot\\text{m}\\)",
+     "un escalar, en \\(\\text{N}\\cdot\\text{m}\\)"
+    ],
+    "correcta": 3,
+    "idea": "\\(F_xr_x + F_yr_y + F_zr_z\\) es una suma de números: un <b>escalar<\/b>, que lleva el producto de las unidades. El vector perpendicular a los dos es el producto <b>cruz<\/b>.",
+    "id": "4.2",
+    "retro": [
+     "Las unidades se multiplican: newton por metro.",
+     "Ése es el producto cruz.",
+     "El producto punto da un número, no un vector.",
+     null
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Para obtener la componente de \\(\\mathbf{U}\\) paralela a la recta que pasa por \\(A\\) y \\(B\\), se usa:",
+    "opciones": [
+     "\\(\\mathbf{U}_p = (\\mathbf{e}_{AB}\\cdot\\mathbf{U})\\,\\mathbf{e}_{AB}\\), con \\(\\mathbf{e}_{AB}\\) unitario",
+     "\\(\\mathbf{U}_p = (\\mathbf{r}_{AB}\\cdot\\mathbf{U})\\,\\mathbf{r}_{AB}\\)",
+     "\\(\\mathbf{U}_p = \\mathbf{e}_{AB}\\times\\mathbf{U}\\)",
+     "\\(\\mathbf{U}_p = |\\mathbf{U}|\\,\\mathbf{e}_{AB}\\)"
+    ],
+    "correcta": 0,
+    "idea": "\\(\\mathbf{e}\\cdot\\mathbf{U} = |\\mathbf{U}|\\cos\\theta\\) es la componente escalar de \\(\\mathbf{U}\\) sobre la recta, y sólo lo es si \\(\\mathbf{e}\\) mide 1. Multiplicada por \\(\\mathbf{e}\\) da el vector \\(\\mathbf{U}_p\\).",
+    "id": "4.3",
+    "retro": [
+     null,
+     "\\(\\mathbf{r}_{AB}\\) no mide 1: habría que dividir entre \\(|\\mathbf{r}_{AB}|\\) dos veces.",
+     "El producto cruz da un vector perpendicular a la recta, no a lo largo de ella.",
+     "Eso sería todo \\(\\mathbf{U}\\) girado sobre la recta; falta el factor \\(\\cos\\theta\\) que da el producto punto."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Si \\(\\mathbf{U}\\cdot\\mathbf{V} < 0\\), el ángulo \\(\\theta\\) entre los dos vectores:",
+    "opciones": [
+     "es menor que \\(90^\\circ\\)",
+     "está entre \\(90^\\circ\\) y \\(180^\\circ\\)",
+     "es exactamente \\(90^\\circ\\)",
+     "no se puede saber sin conocer las magnitudes"
+    ],
+    "correcta": 1,
+    "idea": "Las magnitudes siempre son positivas, así que el signo de \\(|\\mathbf{U}||\\mathbf{V}|\\cos\\theta\\) lo decide \\(\\cos\\theta\\): es negativo para \\(90^\\circ < \\theta \\le 180^\\circ\\).",
+    "id": "4.4",
+    "retro": [
+     "Si \\(\\theta < 90^\\circ\\), \\(\\cos\\theta > 0\\) y el producto sería positivo.",
+     null,
+     "Con \\(\\theta = 90^\\circ\\) el producto punto vale cero, no negativo.",
+     "Las magnitudes son positivas: el signo sólo depende de \\(\\cos\\theta\\), así que sí se puede saber."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Una vez obtenida \\(\\mathbf{U}_p\\) (paralela a \\(\\mathbf{e}\\)), la componente normal \\(\\mathbf{U}_n\\) cumple:",
+    "opciones": [
+     "\\(|\\mathbf{U}_n| = |\\mathbf{U}| - |\\mathbf{U}_p|\\)",
+     "\\(\\mathbf{U}_n = (\\mathbf{e}\\cdot\\mathbf{U})\\,\\mathbf{e}\\)",
+     "\\(\\mathbf{U}_n = \\mathbf{U}\\times\\mathbf{e}\\)",
+     "\\(\\mathbf{U}_n = \\mathbf{U} - \\mathbf{U}_p\\) y \\(\\mathbf{U}_n\\cdot\\mathbf{e} = 0\\)"
+    ],
+    "correcta": 3,
+    "idea": "\\(\\mathbf{U} = \\mathbf{U}_p + \\mathbf{U}_n\\), con las dos partes perpendiculares. Por eso las magnitudes se combinan con Pitágoras, \\(|\\mathbf{U}|^2 = |\\mathbf{U}_p|^2 + |\\mathbf{U}_n|^2\\), y la comprobación es \\(\\mathbf{U}_n\\cdot\\mathbf{e} = 0\\).",
+    "id": "4.5",
+    "retro": [
+     "Las magnitudes no se restan: \\(\\mathbf{U}_p\\) y \\(\\mathbf{U}_n\\) son perpendiculares, se combinan con Pitágoras.",
+     "Ésa es la componente paralela, \\(\\mathbf{U}_p\\).",
+     "\\(\\mathbf{U}\\times\\mathbf{e}\\) es perpendicular a \\(\\mathbf{U}\\) y a \\(\\mathbf{e}\\); no es la parte de \\(\\mathbf{U}\\) normal a la recta.",
+     null
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{U} = 3\\,\\mathbf{i} - 2\\,\\mathbf{j} + 6\\,\\mathbf{k}\\) y \\(\\mathbf{V} = 4\\,\\mathbf{i} + 4\\,\\mathbf{j} - 2\\,\\mathbf{k}\\). Calcule \\(\\mathbf{U}\\cdot\\mathbf{V}\\) y el ángulo \\(\\theta\\) entre ellos.",
+    "pista": null,
+    "idea": "\\(\\mathbf{U}\\cdot\\mathbf{V} = (3)(4) + (-2)(4) + (6)(-2) = -8.00\\). \\(|\\mathbf{U}| = 7\\), \\(|\\mathbf{V}| = 6\\). \\(\\cos\\theta = \\dfrac{-8}{(7)(6)} = -0.190 \\Rightarrow \\theta = 101.0^\\circ\\): obtuso, como anuncia el signo.",
+    "campos": [
+     {
+      "etiqueta": "\\(\\mathbf{U}\\cdot\\mathbf{V}\\)",
+      "unidad": "",
+      "valor": -8
+     },
+     {
+      "etiqueta": "\\(\\theta\\)",
+      "unidad": "°",
+      "valor": 100.980575
+     }
+    ],
+    "id": "4.6",
+    "ayuda": "\\(\\mathbf{U}\\cdot\\mathbf{V} = U_xV_x + U_yV_y + U_zV_z\\) y \\(\\cos\\theta = \\mathbf{U}\\cdot\\mathbf{V}/(|\\mathbf{U}||\\mathbf{V}|)\\).",
+    "errores": [
+     {
+      "campo": 1,
+      "valor": 79.019425,
+      "mensaje": "Perdió el signo del producto punto: con \\(\\mathbf{U}\\cdot\\mathbf{V} < 0\\), el ángulo es obtuso."
+     },
+     {
+      "campo": 0,
+      "valor": 32,
+      "mensaje": "Ignoró los signos de las componentes: \\((-2)(4)\\) y \\((6)(-2)\\) son negativos."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{F} = (200\\,\\mathbf{i} - 100\\,\\mathbf{j} + 300\\,\\mathbf{k})\\ \\text{N}\\). La recta \\(L\\) pasa por el origen y por el punto \\((2,\\,6,\\,3)\\ \\text{m}\\). Obtenga la componente escalar de \\(\\mathbf{F}\\) paralela a \\(L\\) y la magnitud de la componente normal.",
+    "pista": null,
+    "idea": "\\(\\mathbf{e} = \\tfrac17(2\\mathbf{i} + 6\\mathbf{j} + 3\\mathbf{k})\\). \\(\\mathbf{e}\\cdot\\mathbf{F} = \\tfrac17[(2)(200) + (6)(-100) + (3)(300)] = 700/7 = 100\\ \\text{N}\\). \\(|\\mathbf{F}| = 374.2\\ \\text{N}\\), así que \\(|\\mathbf{F}_n| = \\sqrt{374.2^2 - 100^2} = 361\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(\\mathbf{e}\\cdot\\mathbf{F}\\)",
+      "unidad": "N",
+      "valor": 100.0
+     },
+     {
+      "etiqueta": "\\(|\\mathbf{F}_n|\\)",
+      "unidad": "N",
+      "valor": 360.555128
+     }
+    ],
+    "id": "4.7",
+    "ayuda": "Normalice la dirección de \\(L\\), \\(\\mathbf{e} = \\mathbf{r}/|\\mathbf{r}|\\); la componente paralela es \\(\\mathbf{e}\\cdot\\mathbf{F}\\) y la normal sale con Pitágoras.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 700,
+      "mensaje": "Usó el vector de posición sin normalizar: divida entre \\(|\\mathbf{r}| = 7\\ \\text{m}\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 274.165739,
+      "mensaje": "Restó magnitudes; \\(\\mathbf{F}_p\\) y \\(\\mathbf{F}_n\\) son perpendiculares: \\(|\\mathbf{F}_n| = \\sqrt{|\\mathbf{F}|^2 - (\\mathbf{e}\\cdot\\mathbf{F})^2}\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 374.165739,
+      "mensaje": "Ésa es la magnitud de \\(\\mathbf{F}\\) completa; falta quitarle la parte paralela."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Dos cables salen del punto \\(A\\,(0,\\,6,\\,0)\\ \\text{m}\\) hacia \\(B\\,(3,\\,0,\\,4)\\ \\text{m}\\) y \\(C\\,(-2,\\,0,\\,3)\\ \\text{m}\\). ¿Qué ángulo forman los cables?",
+    "pista": "El ángulo entre cables se mide con vectores que salen del punto común \\(A\\).",
+    "idea": "Los vectores deben salir de \\(A\\): \\(\\mathbf{r}_{AB} = 3\\mathbf{i} - 6\\mathbf{j} + 4\\mathbf{k}\\) (\\(|\\mathbf{r}_{AB}| = 7.81\\ \\text{m}\\)) y \\(\\mathbf{r}_{AC} = -2\\mathbf{i} - 6\\mathbf{j} + 3\\mathbf{k}\\) (\\(7\\ \\text{m}\\)). \\(\\mathbf{r}_{AB}\\cdot\\mathbf{r}_{AC} = -6 + 36 + 12 = 42\\ \\text{m}^2\\), \\(\\cos\\theta = \\dfrac{42}{(7.81)(7)} = 0.768 \\Rightarrow \\theta = 39.8^\\circ\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(\\theta\\)",
+      "unidad": "°",
+      "valor": 39.805571
+     }
+    ],
+    "id": "4.8",
+    "ayuda": "Forme \\(\\mathbf{r}_{AB}\\) y \\(\\mathbf{r}_{AC}\\) (los dos salen de \\(A\\)) y use \\(\\cos\\theta = \\dfrac{\\mathbf{r}_{AB}\\cdot\\mathbf{r}_{AC}}{|\\mathbf{r}_{AB}||\\mathbf{r}_{AC}|}\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 70.559965,
+      "mensaje": "Usó los vectores de posición de \\(B\\) y \\(C\\) desde el origen; los cables salen de \\(A\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Se invierte la pregunta: ¿qué valor debe tener \\(a\\) para que \\(\\mathbf{U} = 2\\,\\mathbf{i} + a\\,\\mathbf{j} - \\mathbf{k}\\) sea perpendicular a \\(\\mathbf{V} = 4\\,\\mathbf{i} - 3\\,\\mathbf{j} + 2\\,\\mathbf{k}\\)?",
+    "pista": null,
+    "idea": "Perpendiculares \\(\\Rightarrow \\mathbf{U}\\cdot\\mathbf{V} = 0\\): \\((2)(4) + (a)(-3) + (-1)(2) = 6 - 3a = 0 \\Rightarrow a = 2.00\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(a\\)",
+      "unidad": "",
+      "valor": 2.0
+     }
+    ],
+    "id": "4.9",
+    "ayuda": "Iguale \\(\\mathbf{U}\\cdot\\mathbf{V}\\) a cero y despeje \\(a\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 3.333333,
+      "mensaje": "Revise el término en \\(z\\): \\((-1)(2) = -2\\)."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "titulo": "Producto cruz y triple producto mixto",
+  "ref": "Capítulo 2 · §2.5",
+  "preguntas": [
+   {
+    "tipo": "teoria",
+    "texto": "¿Cuánto valen \\(\\mathbf{i}\\times\\mathbf{j}\\) y \\(\\mathbf{j}\\times\\mathbf{i}\\)?",
+    "opciones": [
+     "\\(1\\) y \\(-1\\)",
+     "\\(0\\) y \\(0\\)",
+     "\\(\\mathbf{k}\\) y \\(\\mathbf{k}\\)",
+     "\\(\\mathbf{k}\\) y \\(-\\mathbf{k}\\)"
+    ],
+    "correcta": 3,
+    "idea": "El producto cruz es un <b>vector<\/b> perpendicular a los dos factores (regla de la mano derecha) y cambia de signo si se invierte el orden: \\(\\mathbf{V}\\times\\mathbf{U} = -\\,\\mathbf{U}\\times\\mathbf{V}\\).",
+    "id": "5.1",
+    "retro": [
+     "El producto cruz da un vector, no un número. Además \\(\\mathbf{i}\\cdot\\mathbf{j} = 0\\).",
+     "El producto cruz de dos vectores perpendiculares no es cero; el de dos paralelos sí (\\(\\mathbf{i}\\times\\mathbf{i} = \\mathbf{0}\\)).",
+     "El producto cruz no es conmutativo: al invertir el orden cambia de signo.",
+     null
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Si \\(\\mathbf{U}\\times\\mathbf{V} = \\mathbf{0}\\) y ninguno de los dos es cero, entonces:",
+    "opciones": [
+     "tienen la misma magnitud",
+     "son perpendiculares",
+     "son paralelos",
+     "\\(\\mathbf{U}\\cdot\\mathbf{V} = 0\\)"
+    ],
+    "correcta": 2,
+    "idea": "\\(|\\mathbf{U}\\times\\mathbf{V}| = |\\mathbf{U}||\\mathbf{V}|\\operatorname{sen}\\theta\\) se anula sólo si \\(\\theta = 0^\\circ\\) o \\(180^\\circ\\). Es la prueba de paralelismo; la de perpendicularidad es el producto punto.",
+    "id": "5.2",
+    "retro": [
+     "El producto cruz depende del ángulo, no de si las magnitudes son iguales.",
+     "Para perpendiculares, \\(\\operatorname{sen}90^\\circ = 1\\) y la magnitud del cruz es máxima.",
+     null,
+     "\\(\\mathbf{U}\\cdot\\mathbf{V} = 0\\) indica perpendicularidad; aquí se anula el cruz, lo que indica lo contrario."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "¿Hacia dónde apunta \\(\\mathbf{U}\\times\\mathbf{V}\\)?",
+    "opciones": [
+     "perpendicular al plano de \\(\\mathbf{U}\\) y \\(\\mathbf{V}\\), con el sentido que da la regla de la mano derecha",
+     "en la dirección de \\(\\mathbf{U}\\)",
+     "en el plano de \\(\\mathbf{U}\\) y \\(\\mathbf{V}\\), entre los dos",
+     "siempre en la dirección de \\(\\mathbf{k}\\)"
+    ],
+    "correcta": 0,
+    "idea": "Con los dedos de la mano derecha de \\(\\mathbf{U}\\) hacia \\(\\mathbf{V}\\) (por el ángulo menor), el pulgar da el sentido. La magnitud es \\(|\\mathbf{U}||\\mathbf{V}|\\operatorname{sen}\\theta\\): el área del paralelogramo.",
+    "id": "5.3",
+    "retro": [
+     null,
+     "\\(\\mathbf{U}\\times\\mathbf{V}\\) es perpendicular a \\(\\mathbf{U}\\): \\((\\mathbf{U}\\times\\mathbf{V})\\cdot\\mathbf{U} = 0\\).",
+     "Así se ve la suma \\(\\mathbf{U}+\\mathbf{V}\\); el producto cruz sale del plano.",
+     "Sólo si \\(\\mathbf{U}\\) y \\(\\mathbf{V}\\) están en el plano \\(xy\\)."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Si el triple producto mixto \\(\\mathbf{U}\\cdot(\\mathbf{V}\\times\\mathbf{W})\\) vale cero (con los tres vectores distintos de cero), entonces:",
+    "opciones": [
+     "los tres vectores son coplanares",
+     "los tres son perpendiculares entre sí",
+     "tienen la misma magnitud",
+     "alguno de los tres tiene que ser cero"
+    ],
+    "correcta": 0,
+    "idea": "\\(\\mathbf{V}\\times\\mathbf{W}\\) es perpendicular al plano de \\(\\mathbf{V}\\) y \\(\\mathbf{W}\\); si \\(\\mathbf{U}\\) es perpendicular a él, \\(\\mathbf{U}\\) está en ese plano. En valor absoluto, el triple producto es el volumen del paralelepípedo, que se aplana.",
+    "id": "5.4",
+    "retro": [
+     null,
+     "Si fueran mutuamente perpendiculares, el volumen sería máximo, no cero.",
+     "Las magnitudes no deciden el triple producto; lo decide la geometría.",
+     "Tres vectores no nulos pueden estar en un mismo plano y dar cero."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Acaba de calcular \\(\\mathbf{C} = \\mathbf{U}\\times\\mathbf{V}\\). ¿Qué comprobación debe cumplirse siempre?",
+    "opciones": [
+     "\\(\\mathbf{C}\\cdot\\mathbf{U} = 0\\) y \\(\\mathbf{C}\\cdot\\mathbf{V} = 0\\)",
+     "\\(|\\mathbf{C}| = |\\mathbf{U}| + |\\mathbf{V}|\\)",
+     "\\(\\mathbf{C}\\times\\mathbf{U} = \\mathbf{0}\\)",
+     "\\(\\mathbf{C}\\cdot\\mathbf{U} = |\\mathbf{C}||\\mathbf{U}|\\)"
+    ],
+    "correcta": 0,
+    "idea": "\\(\\mathbf{U}\\times\\mathbf{V}\\) es perpendicular a los dos factores, así que su producto punto con cada uno es cero. Treinta segundos que cazan un signo equivocado en el determinante.",
+    "id": "5.5",
+    "retro": [
+     null,
+     "\\(|\\mathbf{U}\\times\\mathbf{V}| = |\\mathbf{U}||\\mathbf{V}|\\operatorname{sen}\\theta\\), no una suma.",
+     "\\(\\mathbf{C}\\times\\mathbf{U} = \\mathbf{0}\\) diría que son paralelos; \\(\\mathbf{C}\\) es perpendicular a \\(\\mathbf{U}\\).",
+     "Eso diría que \\(\\mathbf{C}\\) es paralelo a \\(\\mathbf{U}\\); es justo lo contrario."
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{U} = 2\\,\\mathbf{i} - 3\\,\\mathbf{j} + \\mathbf{k}\\) y \\(\\mathbf{V} = -\\mathbf{i} + 4\\,\\mathbf{j} + 2\\,\\mathbf{k}\\). Calcule \\(\\mathbf{U}\\times\\mathbf{V}\\).",
+    "pista": null,
+    "idea": "\\(\\mathbf{U}\\times\\mathbf{V} = \\begin{vmatrix}\\mathbf{i}&\\mathbf{j}&\\mathbf{k}\\\\2&-3&1\\\\-1&4&2\\end{vmatrix} = [(-3)(2) - (1)(4)]\\,\\mathbf{i} - [(2)(2) - (1)(-1)]\\,\\mathbf{j} + [(2)(4) - (-3)(-1)]\\,\\mathbf{k}\\), es decir \\(-10\\,\\mathbf{i} - 5\\,\\mathbf{j} + 5\\,\\mathbf{k}\\) (componentes \\(-10\\), \\(-5\\) y \\(5\\)). Comprobación: \\((\\mathbf{U}\\times\\mathbf{V})\\cdot\\mathbf{U} = -20 + 15 + 5 = 0\\).",
+    "campos": [
+     {
+      "etiqueta": "componente \\(x\\)",
+      "unidad": "",
+      "valor": -10
+     },
+     {
+      "etiqueta": "componente \\(y\\)",
+      "unidad": "",
+      "valor": -5
+     },
+     {
+      "etiqueta": "componente \\(z\\)",
+      "unidad": "",
+      "valor": 5
+     }
+    ],
+    "id": "5.6",
+    "ayuda": "Desarrolle el determinante \\(\\begin{vmatrix}\\mathbf{i}&\\mathbf{j}&\\mathbf{k}\\\\U_x&U_y&U_z\\\\V_x&V_y&V_z\\end{vmatrix}\\); el término en \\(\\mathbf{j}\\) lleva signo menos.",
+    "errores": [
+     {
+      "campo": 1,
+      "valor": 5,
+      "mensaje": "El término en \\(\\mathbf{j}\\) lleva signo menos: \\(-[(2)(2) - (1)(-1)] = -5\\)."
+     },
+     {
+      "campo": 0,
+      "valor": -2,
+      "mensaje": "Es una resta: \\(U_yV_z - U_zV_y = (-3)(2) - (1)(4)\\)."
+     },
+     {
+      "campo": 2,
+      "valor": 11,
+      "mensaje": "Es una resta: \\(U_xV_y - U_yV_x = (2)(4) - (-3)(-1)\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Con los mismos \\(\\mathbf{U}\\) y \\(\\mathbf{V}\\), obtenga \\(|\\mathbf{U}\\times\\mathbf{V}|\\) y la componente \\(x\\) del vector unitario que apunta en la dirección de \\(\\mathbf{U}\\times\\mathbf{V}\\).",
+    "pista": null,
+    "idea": "\\(|\\mathbf{U}\\times\\mathbf{V}| = \\sqrt{(-10)^2 + (-5)^2 + 5^2} = \\sqrt{150} = 12.2\\). El unitario es \\((\\mathbf{U}\\times\\mathbf{V})/|\\mathbf{U}\\times\\mathbf{V}|\\), así que \\(e_x = -10/12.25 = -0.816\\). Es perpendicular a \\(\\mathbf{U}\\) y a \\(\\mathbf{V}\\) a la vez.",
+    "campos": [
+     {
+      "etiqueta": "\\(|\\mathbf{U}\\times\\mathbf{V}|\\)",
+      "unidad": "",
+      "valor": 12.247449
+     },
+     {
+      "etiqueta": "\\(e_x\\)",
+      "unidad": "",
+      "valor": -0.816497
+     }
+    ],
+    "id": "5.7",
+    "ayuda": "\\(|\\mathbf{C}| = \\sqrt{C_x^2 + C_y^2 + C_z^2}\\) y \\(e_x = C_x/|\\mathbf{C}|\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 150,
+      "mensaje": "Faltó sacar la raíz cuadrada."
+     },
+     {
+      "campo": 1,
+      "valor": -10,
+      "mensaje": "Ésa es la componente de \\(\\mathbf{U}\\times\\mathbf{V}\\); falta dividir entre su magnitud."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "\\(\\mathbf{r} = (4\\,\\mathbf{i} + 3\\,\\mathbf{j})\\ \\text{m}\\) y \\(\\mathbf{F} = (50\\,\\mathbf{i} - 20\\,\\mathbf{j})\\ \\text{N}\\). Obtenga la componente \\(z\\) de \\(\\mathbf{r}\\times\\mathbf{F}\\).",
+    "pista": null,
+    "idea": "Con \\(r_z = F_z = 0\\) sólo queda la componente \\(z\\): \\(r_xF_y - r_yF_x = (4)(-20) - (3)(50) = -230\\ \\text{N}\\cdot\\text{m}\\). Negativa: el vector apunta hacia \\(-\\mathbf{k}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\((\\mathbf{r}\\times\\mathbf{F})_z\\)",
+      "unidad": "N·m",
+      "valor": -230
+     }
+    ],
+    "id": "5.8",
+    "ayuda": "\\((\\mathbf{r}\\times\\mathbf{F})_z = r_xF_y - r_yF_x\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 70,
+      "mensaje": "Es una resta: \\(r_xF_y - r_yF_x\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 140,
+      "mensaje": "Ése es el producto punto: \\(r_xF_x + r_yF_y\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Calcule el triple producto mixto \\(\\mathbf{U}\\cdot(\\mathbf{V}\\times\\mathbf{W})\\) con \\(\\mathbf{U} = \\mathbf{i} + 2\\,\\mathbf{j} - \\mathbf{k}\\), \\(\\mathbf{V} = 3\\,\\mathbf{i} + 2\\,\\mathbf{k}\\) y \\(\\mathbf{W} = -2\\,\\mathbf{i} + \\mathbf{j} + 4\\,\\mathbf{k}\\).",
+    "pista": null,
+    "idea": "\\(\\begin{vmatrix}1&2&-1\\\\3&0&2\\\\-2&1&4\\end{vmatrix} = 1[(0)(4) - (2)(1)] - 2[(3)(4) - (2)(-2)] + (-1)[(3)(1) - (0)(-2)] = -2 - 32 - 3 = -37.0\\). El término del medio lleva signo menos, como en el producto cruz.",
+    "campos": [
+     {
+      "etiqueta": "\\(\\mathbf{U}\\cdot(\\mathbf{V}\\times\\mathbf{W})\\)",
+      "unidad": "",
+      "valor": -37
+     }
+    ],
+    "id": "5.9",
+    "ayuda": "Desarrolle el determinante de \\(3\\times3\\) con las filas \\(\\mathbf{U}\\), \\(\\mathbf{V}\\), \\(\\mathbf{W}\\), en ese orden.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 27,
+      "mensaje": "El término del medio lleva signo menos: \\(-2[(3)(4) - (2)(-2)]\\)."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Se invierte la pregunta: ¿qué valor debe tener \\(a\\) para que \\(\\mathbf{U} = 2\\,\\mathbf{i} + a\\,\\mathbf{j} + \\mathbf{k}\\), \\(\\mathbf{V} = \\mathbf{i} - \\mathbf{j} + 3\\,\\mathbf{k}\\) y \\(\\mathbf{W} = 2\\,\\mathbf{j} + 4\\,\\mathbf{k}\\) sean coplanares?",
+    "pista": "Tres vectores son coplanares si su triple producto mixto es cero.",
+    "idea": "Coplanares \\(\\Rightarrow \\mathbf{U}\\cdot(\\mathbf{V}\\times\\mathbf{W}) = 0\\): \\(2[(-1)(4) - (3)(2)] - a[(1)(4) - (3)(0)] + 1[(1)(2) - (-1)(0)] = -20 - 4a + 2 = 0 \\Rightarrow a = -4.50\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(a\\)",
+      "unidad": "",
+      "valor": -4.5
+     }
+    ],
+    "id": "5.10",
+    "ayuda": "Plantee \\(\\mathbf{U}\\cdot(\\mathbf{V}\\times\\mathbf{W}) = 0\\) con el determinante y despeje \\(a\\).",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": -5.5,
+      "mensaje": "Revise el último término: \\(1[(1)(2) - (-1)(0)] = +2\\)."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "titulo": "Respaldo: equilibrio de la partícula (probablemente no entra)",
+  "ref": "Capítulo 3 · §§3.1–3.3 — repaso de respaldo; la minuta dice «hasta álgebra vectorial»",
+  "preguntas": [
+   {
+    "tipo": "teoria",
+    "texto": "Para una partícula en equilibrio en el <b>espacio<\/b>, \\(\\sum\\mathbf{F} = \\mathbf{0}\\) da:",
+    "opciones": [
+     "tres ecuaciones escalares, \\(\\sum F_x = \\sum F_y = \\sum F_z = 0\\): se despejan hasta tres incógnitas",
+     "dos ecuaciones, igual que en el plano",
+     "una sola ecuación, \\(|\\sum\\mathbf{F}| = 0\\), que no se puede separar",
+     "seis ecuaciones, porque hay tres fuerzas y tres ejes"
+    ],
+    "correcta": 0,
+    "idea": "Una ecuación vectorial en 3D equivale a tres escalares, una por eje. Plantear sólo dos en un problema tridimensional es uno de los errores clásicos.",
+    "id": "6.1",
+    "retro": [
+     null,
+     "En el espacio hay un eje más: tres ecuaciones.",
+     "Sí se separa: cada componente de \\(\\sum\\mathbf{F}\\) debe ser cero.",
+     "Son tres ecuaciones, una por eje, sin importar cuántas fuerzas haya."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "Un cable pasa por una polea ideal (sin fricción). La tensión del cable:",
+    "opciones": [
+     "es mayor del lado que sostiene la carga",
+     "es la misma a los dos lados de la polea",
+     "se reduce a la mitad al pasar por la polea",
+     "depende del ángulo con que el cable entra a la polea"
+    ],
+    "correcta": 1,
+    "idea": "La polea ideal sólo cambia la <b>dirección<\/b> del cable, no su tensión. Lo que sí depende del ángulo es la fuerza total que el cable ejerce sobre la polea.",
+    "id": "6.2",
+    "retro": [
+     "En una polea ideal no hay fricción que haga diferente la tensión de cada lado.",
+     null,
+     "Eso pasa con una polea <b>móvil<\/b> sostenida por dos tramos del cable, no con la tensión de un cable al pasar.",
+     "El ángulo cambia la fuerza sobre la polea, no la tensión del cable."
+    ]
+   },
+   {
+    "tipo": "teoria",
+    "texto": "En el diagrama de cuerpo libre de un anillo sostenido por cables y del que cuelga un peso, se dibujan:",
+    "opciones": [
+     "también las fuerzas que el anillo ejerce sobre los cables",
+     "el peso y las fuerzas de los cables, que tiran <b>alejándose<\/b> del anillo a lo largo de cada cable",
+     "sólo las fuerzas de los cables, porque el peso ya está incluido en ellas",
+     "las fuerzas de los cables empujando <b>hacia<\/b> el anillo"
+    ],
+    "correcta": 1,
+    "idea": "Un cable sólo puede <b>tirar<\/b>. En el DCL van únicamente las fuerzas que el entorno ejerce sobre el cuerpo aislado; las reacciones del cuerpo sobre los cables pertenecen a otros diagramas.",
+    "id": "6.3",
+    "retro": [
+     "Ésas son fuerzas sobre los cables, no sobre el anillo.",
+     null,
+     "El peso es una fuerza aparte y siempre va en el DCL.",
+     "Un cable no puede empujar: siempre tira alejándose del cuerpo."
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Una masa de \\(50.0\\ \\text{kg}\\) cuelga de dos cables: el cable \\(A\\) forma \\(30.0^\\circ\\) con la horizontal hacia la izquierda y el cable \\(B\\) forma \\(45.0^\\circ\\) con la horizontal hacia la derecha. Obtenga las tensiones.",
+    "pista": null,
+    "idea": "\\(W = (50.0)(9.81) = 490.5\\ \\text{N}\\). \\(\\sum F_x = 0\\): \\(T_B\\cos45^\\circ = T_A\\cos30^\\circ\\). \\(\\sum F_y = 0\\): \\(T_A\\operatorname{sen}30^\\circ + T_B\\operatorname{sen}45^\\circ = 490.5\\). Sustituyendo, \\(T_A(0.500 + 0.866) = 490.5 \\Rightarrow T_A = 359\\ \\text{N}\\) y \\(T_B = 359\\,\\dfrac{\\cos30^\\circ}{\\cos45^\\circ} = 440\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(T_A\\)",
+      "unidad": "N",
+      "valor": 359.070921
+     },
+     {
+      "etiqueta": "\\(T_B\\)",
+      "unidad": "N",
+      "valor": 439.770269
+     }
+    ],
+    "id": "6.4",
+    "ayuda": "Plantee \\(\\sum F_x = 0\\) y \\(\\sum F_y = 0\\) con \\(W = mg\\), en newtons.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 36.60254,
+      "mensaje": "Usó la masa (\\(50.0\\ \\text{kg}\\)) como si fuera el peso: \\(W = mg = 490.5\\ \\text{N}\\)."
+     },
+     {
+      "campo": 1,
+      "valor": 44.828774,
+      "mensaje": "Usó la masa (\\(50.0\\ \\text{kg}\\)) como si fuera el peso: \\(W = mg = 490.5\\ \\text{N}\\)."
+     },
+     {
+      "campo": 0,
+      "valor": 439.770269,
+      "mensaje": "Intercambió las tensiones: el cable más empinado (\\(45^\\circ\\)) carga más."
+     },
+     {
+      "campo": 1,
+      "valor": 359.070921,
+      "mensaje": "Intercambió las tensiones: el cable más empinado (\\(45^\\circ\\)) carga más."
+     }
+    ]
+   },
+   {
+    "tipo": "numerica",
+    "texto": "Un peso de \\(700\\ \\text{N}\\) cuelga del punto \\(A\\) (origen, eje \\(y\\) vertical hacia arriba) y lo sostienen tres cables que van a \\(B\\,(-2,\\,6,\\,3)\\ \\text{m}\\), \\(C\\,(3,\\,6,\\,-2)\\ \\text{m}\\) y \\(D\\,(-4,\\,4,\\,-2)\\ \\text{m}\\). Obtenga las tensiones.",
+    "pista": "Una ecuación por eje: tres ecuaciones, tres incógnitas.",
+    "idea": "Unitarios: \\(\\mathbf{e}_{AB} = \\tfrac17(-2, 6, 3)\\), \\(\\mathbf{e}_{AC} = \\tfrac17(3, 6, -2)\\), \\(\\mathbf{e}_{AD} = \\tfrac16(-4, 4, -2)\\). \\(T_{AB}\\mathbf{e}_{AB} + T_{AC}\\mathbf{e}_{AC} + T_{AD}\\mathbf{e}_{AD} - 700\\,\\mathbf{j} = \\mathbf{0}\\) da tres ecuaciones; al resolverlas, \\(T_{AB} = 343\\ \\text{N}\\), \\(T_{AC} = 392\\ \\text{N}\\) y \\(T_{AD} = 105\\ \\text{N}\\). Comprobación en \\(y\\): \\(\\tfrac67(343) + \\tfrac67(392) + \\tfrac46(105) = 294 + 336 + 70 = 700\\ \\text{N}\\).",
+    "campos": [
+     {
+      "etiqueta": "\\(T_{AB}\\)",
+      "unidad": "N",
+      "valor": 343.0
+     },
+     {
+      "etiqueta": "\\(T_{AC}\\)",
+      "unidad": "N",
+      "valor": 392.0
+     },
+     {
+      "etiqueta": "\\(T_{AD}\\)",
+      "unidad": "N",
+      "valor": 105.0
+     }
+    ],
+    "id": "6.5",
+    "ayuda": "Escriba cada tensión como \\(T\\,\\mathbf{e}\\), sume con el peso \\(-700\\,\\mathbf{j}\\) y plantee una ecuación por eje.",
+    "errores": [
+     {
+      "campo": 0,
+      "valor": 49.0,
+      "mensaje": "Usó \\(\\mathbf{r}\\) en lugar de \\(\\mathbf{e}\\): la tensión debe multiplicar al <b>unitario<\/b>."
+     },
+     {
+      "campo": 1,
+      "valor": 56.0,
+      "mensaje": "Usó \\(\\mathbf{r}\\) en lugar de \\(\\mathbf{e}\\): la tensión debe multiplicar al <b>unitario<\/b>."
+     },
+     {
+      "campo": 2,
+      "valor": 17.5,
+      "mensaje": "Usó \\(\\mathbf{r}\\) en lugar de \\(\\mathbf{e}\\): la tensión debe multiplicar al <b>unitario<\/b>."
+     }
+    ]
+   }
+  ]
+ }
+];
+    const LLAVE = 'repaso_depto1_estatica_2026B';
+    const LETRAS = ['a', 'b', 'c', 'd'];
+    const TOL_REL = 0.015;
+    const intentos = {};
 
-            // ================= CAPITULO 4: MOMENTOS Y SISTEMAS =================
-            { cap: 4, type: "Teoría", q: "Defina el concepto vectorial de 'momento de una fuerza' con respecto a un punto.", h: "Involucra un producto vectorial entre el vector posición y el vector fuerza.", opts: [
-                { t: "Es la tendencia de la fuerza a causar traslación lineal.", c: false },
-                { t: "Es la tendencia de la fuerza a causar rotación, definido como \\(\\mathbf{M}_O = \\mathbf{r} \\times \\mathbf{F}\\).", c: true },
-                { t: "Es el producto punto entre la masa y la aceleración.", c: false },
-                { t: "Es el trabajo realizado por la fuerza a lo largo de una distancia.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "En el producto cruz \\(\\mathbf{M}_O = \\mathbf{r} \\times \\mathbf{F}\\), ¿qué representa el vector de posición \\(\\mathbf{r}\\)?", h: "Es el brazo de palanca vectorial que 'conecta' el pivote con la fuerza.", opts: [
-                { t: "El vector desde el punto de referencia hasta el centroide del cuerpo.", c: false },
-                { t: "Un vector unitario perpendicular al plano de rotación.", c: false },
-                { t: "Un vector trazado desde el punto de referencia hasta CUALQUIER punto sobre la línea de acción de la fuerza.", c: true },
-                { t: "La distancia escalar más corta (perpendicular) a la fuerza.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Qué regla determina convencionalmente el sentido y dirección del vector momento resultante en un espacio tridimensional?", h: "Involucra el uso de tu mano para alinear vectores cartesianos.", opts: [
-                { t: "La regla de la mano derecha.", c: true },
-                { t: "El teorema de los ejes paralelos.", c: false },
-                { t: "La regla de la mano izquierda de Fleming.", c: false },
-                { t: "La ley del paralelogramo.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Qué establece el Teorema de Varignon (Principio de Momentos)?", h: "Habla sobre descomponer una fuerza para facilitar el cálculo de momentos.", opts: [
-                { t: "El momento de una fuerza es siempre nulo si pasa por el centro de masa.", c: false },
-                { t: "El momento de una fuerza respecto a un punto es igual a la suma algebraica de los momentos de sus componentes.", c: true },
-                { t: "Para que haya equilibrio, la suma de las fuerzas debe ser igual a la suma de los momentos.", c: false },
-                { t: "El momento resultante depende de la velocidad de rotación.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Cómo se calcula la magnitud escalar del momento de una fuerza coplanar?", h: "Piensa en la fórmula más intuitiva del uso de una palanca.", opts: [
-                { t: "Multiplicando la fuerza por el coseno del ángulo de inclinación.", c: false },
-                { t: "Multiplicando la masa por la aceleración de la gravedad.", c: false },
-                { t: "Dividiendo la fuerza entre la distancia al pivote.", c: false },
-                { t: "Multiplicando la magnitud de la fuerza por la distancia perpendicular desde el eje a la línea de acción (\\(M = F \\cdot d\\)).", c: true }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Qué operación matemática se utiliza para encontrar el momento de una fuerza respecto a un eje específico arbitrario?", h: "Combina un producto escalar para proyectar, y un producto vectorial para generar el momento original.", opts: [
-                { t: "El producto triple escalar: \\(M_a = \\mathbf{u}_a \\cdot (\\mathbf{r} \\times \\mathbf{F})\\).", c: true },
-                { t: "La doble integral de área.", c: false },
-                { t: "El producto punto entre la fuerza y el vector posición.", c: false },
-                { t: "La derivada cruzada del momento principal.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Cuáles son las tres características que definen estrictamente a un 'par de fuerzas'?", h: "Imagina cómo tomas el volante de tu auto para girarlo en tu propio eje.", opts: [
-                { t: "Dos fuerzas perpendiculares de igual magnitud.", c: false },
-                { t: "Dos fuerzas de igual magnitud, líneas de acción paralelas y sentidos opuestos.", c: true },
-                { t: "Múltiples fuerzas concurrentes que suman cero.", c: false },
-                { t: "Dos fuerzas colineales y de sentido opuesto (que se cancelan totalmente).", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Por qué se dice que el momento de un par de fuerzas es un 'vector libre'?", h: "No requiere de un origen específico 'O' para mantener su valor.", opts: [
-                { t: "Porque no interactúa con el cuerpo rígido.", c: false },
-                { t: "Porque siempre es igual a cero en 3D.", c: false },
-                { t: "Porque su magnitud y dirección son idénticas independientemente del punto espacial respecto al cual se calcule.", c: true },
-                { t: "Porque no tiene magnitud definida, solo dirección.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "Si se desplaza una fuerza paralela a su línea de acción de un punto A a un punto B, ¿qué se debe añadir para mantener la equivalencia estática?", h: "Al mover la fuerza, se pierde la tendencia de giro original. Hay que reponerla sintéticamente.", opts: [
-                { t: "Se debe cambiar la magnitud de la fuerza.", c: false },
-                { t: "Un momento de par en B igual al momento que ejercía la fuerza original respecto al nuevo punto B.", c: true },
-                { t: "Una fuerza de fricción en sentido contrario.", c: false },
-                { t: "Un vector de posición adicional.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Qué significa que un sistema complejo de fuerzas se 'reduzca' a un sistema fuerza-par en un punto O?", h: "Es sintetizar traslación y rotación en su mínima expresión matemática.", opts: [
-                { t: "Eliminar todas las fuerzas para que el cuerpo quede en reposo.", c: false },
-                { t: "Transformar todas las fuerzas en vectores unitarios.", c: false },
-                { t: "Encontrar una única fuerza resultante y un único momento resultante en O que produzcan el mismo efecto externo.", c: true },
-                { t: "Mover el centro de masa del cuerpo hacia el punto O.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "Si la fuerza resultante y el momento resultante en un punto son perpendiculares entre sí, ¿a qué sistema se puede seguir reduciendo?", h: "Convierte el momento puro en una excentricidad (distancia) para la fuerza.", opts: [
-                { t: "Se reduce a cero absoluto (equilibrio perfecto).", c: false },
-                { t: "A un sistema de dos pares de fuerzas.", c: false },
-                { t: "A un par torsor puro.", c: false },
-                { t: "A una sola fuerza resultante desplazada a una nueva línea de acción.", c: true }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Qué es una 'llave de torsión' (wrench) en el análisis de sistemas equivalentes en 3D?", h: "Imagina el movimiento de usar un destornillador: empujar y girar sobre el mismo eje.", opts: [
-                { t: "Una herramienta física usada para apretar pernos estructurales.", c: false },
-                { t: "Un sistema de fuerzas concurrentes coplanares.", c: false },
-                { t: "La reducción espacial donde la fuerza resultante y el momento resultante son colineales.", c: true },
-                { t: "Un momento de inercia aplicado a una viga.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "Si el producto vectorial \\(\\mathbf{r} \\times \\mathbf{F}\\) es cero, ¿qué significa geométricamente?", h: "Si empujas exactamente en la bisagra de una puerta, no lograrás girarla.", opts: [
-                { t: "Que la fuerza es paralela al eje Z.", c: false },
-                { t: "Que el sistema está rotando a velocidad constante.", c: false },
-                { t: "Que la fuerza es igual a la masa por la aceleración.", c: false },
-                { t: "Que la línea de acción de la fuerza pasa exactamente por el punto de referencia (brazo de palanca nulo).", c: true }
-            ]},
-            { cap: 4, type: "Teoría", q: "En la notación escalar bidimensional, ¿qué convención de signos se utiliza universalmente para los momentos?", h: "Basado en la regla de la mano derecha en el plano XY.", opts: [
-                { t: "Positivo (+) antihorario, Negativo (-) horario.", c: true },
-                { t: "Positivo (+) hacia arriba, Negativo (-) hacia abajo.", c: false },
-                { t: "Positivo (+) horario, Negativo (-) antihorario.", c: false },
-                { t: "El signo depende del cuadrante donde se ubique la fuerza.", c: false }
-            ]},
-            { cap: 4, type: "Teoría", q: "¿Por qué es útil conocer el momento respecto a un eje en el diseño de mecanismos como bisagras?", h: "Un motor solo puede girar en torno al eje geométrico de su flecha.", opts: [
-                { t: "Porque determina el peso del mecanismo.", c: false },
-                { t: "Para conocer la longitud exacta de las barras del mecanismo.", c: false },
-                { t: "Porque indica la porción del momento total que efectivamente causará o resistirá la rotación física sobre ese eje.", c: true },
-                { t: "Porque elimina la fricción del sistema.", c: false }
-            ]},
-            { cap: 4, type: "Práctica", q: "Una fuerza vertical descendente de 100 N se aplica en el extremo de una viga en voladizo de 4 m. ¿Cuál es el momento respecto al empotramiento?", h: "Multiplica fuerza por distancia y aplica convención de signos (la fuerza empuja hacia abajo a la derecha del pivote).", opts: [
-                { t: "400 N\\(\\cdot\\)m (Antihorario)", c: false },
-                { t: "-400 N\\(\\cdot\\)m (Horario)", c: true },
-                { t: "25 N\\(\\cdot\\)m", c: false },
-                { t: "-100 N\\(\\cdot\\)m", c: false }
-            ]},
-            { cap: 4, type: "Práctica", q: "Determine el momento producido por un par de fuerzas paralelas opuestas de 50 N, separadas por una distancia perpendicular de 0.2 m.", h: "\\(M = F \\cdot d\\), no importa el punto de referencia.", opts: [
-                { t: "10 N\\(\\cdot\\)m", c: true },
-                { t: "25 N\\(\\cdot\\)m", c: false },
-                { t: "100 N\\(\\cdot\\)m", c: false },
-                { t: "0 N\\(\\cdot\\)m", c: false }
-            ]},
-            { cap: 4, type: "Práctica", q: "Una fuerza \\(\\mathbf{F} = (3\\mathbf{i} + 4\\mathbf{j})\\text{ N}\\) actúa en la posición \\(\\mathbf{r} = (5\\mathbf{i})\\text{ m}\\). Calcule el momento \\(\\mathbf{M}_O\\) usando producto cruz.", h: "Resuelve el determinante para los vectores \\(\\mathbf{i}, \\mathbf{j}, \\mathbf{k}\\). \\((5)(4) - (0)(3)\\).", opts: [
-                { t: "\\(15\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: false },
-                { t: "\\(20\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: true },
-                { t: "\\(12\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: false },
-                { t: "\\(-20\\mathbf{k}\\text{ N}\\cdot\\text{m}\\)", c: false }
-            ]},
-            { cap: 4, type: "Práctica", q: "Se reemplaza una fuerza descendente de 200 N en \\(x=2\\text{ m}\\) por un sistema en el origen. ¿Cuál es el nuevo sistema equivalente?", h: "Calcula el momento original y trasládalo junto con la fuerza.", opts: [
-                { t: "Fuerza 200 N (abajo) y momento horario de 400 N\\(\\cdot\\)m.", c: true },
-                { t: "Solo una fuerza de 200 N en el origen.", c: false },
-                { t: "Fuerza 200 N (arriba) y momento antihorario de 400 N\\(\\cdot\\)m.", c: false },
-                { t: "Un par de fuerzas puro de 400 N\\(\\cdot\\)m.", c: false }
-            ]},
-            { cap: 4, type: "Práctica", q: "Si un momento es de 600 N\\(\\cdot\\)m y la fuerza resultante es de 150 N, ¿a qué distancia debe desplazarse la fuerza para crear un sistema equivalente de 1 sola fuerza?", h: "Despeja \\(d\\) de la ecuación escalar de momento.", opts: [
-                { t: "0.25 m", c: false },
-                { t: "2 m", c: false },
-                { t: "4 m", c: true },
-                { t: "90000 m", c: false }
-            ]},
+    // ---------------- avance guardado (sólo en este navegador)
+    function cargar() {
+        try { return JSON.parse(localStorage.getItem(LLAVE)) || {}; } catch (e) { return {}; }
+    }
+    function guardar() {
+        try { localStorage.setItem(LLAVE, JSON.stringify(estado)); } catch (e) { /* sin almacenamiento */ }
+    }
+    let estado = cargar();   // { "1.3": "ok" | "vista" }
+    const TOTAL = BLOQUES.reduce((n, b) => n + b.preguntas.length, 0);
 
-            // ================= CAPITULO 5: CUERPOS RÍGIDOS =================
-            { cap: 5, type: "Teoría", q: "¿Cuál es la diferencia fundamental entre el equilibrio de una partícula y el de un cuerpo rígido?", h: "El cuerpo rígido tiene volumen, y por lo tanto, un brazo de palanca interno.", opts: [
-                { t: "El cuerpo rígido no puede tener aceleración.", c: false },
-                { t: "La partícula no considera la gravedad.", c: false },
-                { t: "El cuerpo rígido exige que tanto la sumatoria de fuerzas como la de momentos sean cero.", c: true },
-                { t: "El cuerpo rígido se analiza solo en 3D.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "En un DCL en 2D, ¿qué restricciones mecánicas y reacciones impone un soporte tipo 'rodillo' (roller)?", h: "Piensa en un patín sobre hielo.", opts: [
-                { t: "Impide traslación perpendicular (1 fuerza normal), permite deslizamiento y rotación.", c: true },
-                { t: "Impide toda traslación (2 fuerzas ortogonales).", c: false },
-                { t: "Impide rotación (1 momento reactivo).", c: false },
-                { t: "Impide todo movimiento (empotramiento total).", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿Qué incógnitas de reacción se asumen al sustituir un apoyo tipo 'pasador liso' (bisagra) en 2D?", h: "Una puerta puede girar en su bisagra, pero no zafarse de la pared.", opts: [
-                { t: "Un momento reactivo puro.", c: false },
-                { t: "Tres incógnitas: dos fuerzas y un momento.", c: false },
-                { t: "Dos fuerzas ortogonales de reacción (\\(R_x\\) y \\(R_y\\)), permitiendo rotación libre.", c: true },
-                { t: "Una fuerza perpendicular a la barra.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "En un empotramiento fijo en 2D (soporte fijo), ¿cuántas y cuáles son las incógnitas de reacción?", h: "El empotramiento es el soporte más restrictivo de todos.", opts: [
-                { t: "Dos fuerzas y dos momentos.", c: false },
-                { t: "Una fuerza y un momento.", c: false },
-                { t: "Tres: dos componentes de fuerza (\\(R_x, R_y\\)) y un momento de par reactivo.", c: true },
-                { t: "Solo fuerzas normales.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "En 3D, ¿qué tipo de conexión representa una 'rótula esférica' (ball and socket) y qué incógnitas genera?", h: "Funciona como la articulación de la cadera humana.", opts: [
-                { t: "Impide traslación (3 fuerzas) pero permite rotación libre en los 3 ejes.", c: true },
-                { t: "Impide rotación (3 momentos) pero permite traslación.", c: false },
-                { t: "Genera 6 incógnitas (empotramiento 3D).", c: false },
-                { t: "Es el equivalente 3D de un rodillo.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿Qué define a un 'miembro de dos fuerzas' y por qué es crucial identificarlo?", h: "Es la base para entender cómo funcionan las celosías o armaduras.", opts: [
-                { t: "Es un objeto que soporta dos momentos torsores en sus extremos.", c: false },
-                { t: "Cuerpo sometido a fuerzas en solo 2 puntos; dichas fuerzas deben ser colineales, de igual magnitud y opuestas.", c: true },
-                { t: "Un elemento curvo sometido a flexión transversal constante.", c: false },
-                { t: "Cualquier barra que pese más que las cargas aplicadas.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿Qué establece el principio sobre un 'miembro de tres fuerzas'?", h: "Si las líneas de acción no convergen, el sistema rotaría sin control.", opts: [
-                { t: "Las tres fuerzas deben ser siempre paralelas.", c: false },
-                { t: "Las líneas de acción de las tres fuerzas (si no son paralelas) deben concurrir en un solo punto.", c: true },
-                { t: "Una fuerza debe ser igual a la suma de las otras dos.", c: false },
-                { t: "El objeto debe ser obligatoriamente un triángulo.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "Un sistema es 'estáticamente indeterminado' (hiperestático) si...", h: "Hay más incógnitas de reacción que ecuaciones de la estática.", opts: [
-                { t: "No tiene suficientes soportes y colapsará.", c: false },
-                { t: "El número de incógnitas supera las ecuaciones de equilibrio disponibles.", c: true },
-                { t: "El objeto está en movimiento acelerado.", c: false },
-                { t: "Todas sus dimensiones son desconocidas.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿Qué es una 'restricción impropia' en estática?", h: "Imagina una caja pesada apoyada sobre cuatro ruedas de patineta orientadas igual.", opts: [
-                { t: "Un empotramiento en un material frágil.", c: false },
-                { t: "Ocurre cuando las reacciones externas son paralelas o concurrentes, permitiendo traslación o rotación no deseada.", c: true },
-                { t: "El uso de pasadores oxidados que no giran libremente.", c: false },
-                { t: "Una fuerza externa aplicada en el centroide exacto.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿Por qué es estratégico calcular la sumatoria de momentos en el punto donde hay un pasador liso?", h: "Los pasadores generan dos incógnitas de fuerza; si pivotas sobre ellas, desaparecen de tu ecuación.", opts: [
-                { t: "Porque anula el brazo de palanca de las incógnitas del pasador, eliminándolas de la ecuación temporalmente.", c: true },
-                { t: "Porque ahí el momento siempre es máximo.", c: false },
-                { t: "Porque los pasadores resisten momentos, simplificando el sistema.", c: false },
-                { t: "Es una regla visual, matemáticamente da el mismo trabajo.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿Cuántas ecuaciones de equilibrio linealmente independientes hay para un cuerpo rígido en 3D?", h: "Debes bloquear movimiento en cada eje (X, Y, Z) y giro alrededor de cada eje.", opts: [
-                { t: "3", c: false },
-                { t: "4", c: false },
-                { t: "6 (3 de fuerza, 3 de momento)", c: true },
-                { t: "9", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "Si al resolver el equilibrio asumes el sentido incorrecto de una reacción en el DCL, ¿qué pasará?", h: "Las matemáticas de la estática te corregirán automáticamente.", opts: [
-                { t: "El sistema de ecuaciones no tendrá solución.", c: false },
-                { t: "El resultado numérico será negativo, indicando que la dirección real es opuesta.", c: true },
-                { t: "Obtendrás una división por cero.", c: false },
-                { t: "El cuerpo resultará estáticamente indeterminado.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿Cómo se trata estáticamente una carga distribuida (ej. peso por longitud) para calcular reacciones de apoyo?", h: "Transformas una figura geométrica en una flecha representativa.", opts: [
-                { t: "Se reemplaza por múltiples fuerzas pequeñas a lo largo del eje.", c: false },
-                { t: "Se ignora si es menor al peso de la viga.", c: false },
-                { t: "Se reemplaza por una fuerza puntual equivalente, ubicada en el centroide del área de carga.", c: true },
-                { t: "Se divide a la mitad y se aplica en los extremos.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "En un soporte de 'chumacera de empuje' (thrust bearing) alineado en el eje X, ¿qué se previene?", h: "Este rodamiento resiste cargas longitudinales, como la hélice de un barco empujando su eje.", opts: [
-                { t: "Solo movimientos rotacionales.", c: false },
-                { t: "Traslación radial y traslación axial a lo largo de su flecha.", c: true },
-                { t: "El pandeo térmico de la barra.", c: false },
-                { t: "Únicamente la traslación vertical.", c: false }
-            ]},
-            { cap: 5, type: "Teoría", q: "¿El peso total de un cuerpo rígido uniforme se asume aplicado en qué punto específico?", h: "El punto de equilibrio perfecto.", opts: [
-                { t: "En la base de apoyo más grande.", c: false },
-                { t: "En el extremo derecho por convención.", c: false },
-                { t: "En su centro de gravedad (o centroide geométrico).", c: true },
-                { t: "Distribuido uniformemente solo en los pasadores.", c: false }
-            ]},
-            { cap: 5, type: "Práctica", q: "Viga AB de 10 m, pasador en A y rodillo en B. Carga de 500 N hacia abajo a 2 m de A. Calcule reacción vertical en B.", h: "\\(\\sum M_A = 0 \\rightarrow -500(2) + R_B(10) = 0\\)", opts: [
-                { t: "1000 N", c: false },
-                { t: "100 N", c: true },
-                { t: "250 N", c: false },
-                { t: "400 N", c: false }
-            ]},
-            { cap: 5, type: "Práctica", q: "Ménsula empotrada, momento horario externo de 200 N\\(\\cdot\\)m, fuerza descendente 50 N a 3 m. Calcule momento reactivo en empotramiento.", h: "El soporte debe resistir el momento externo MÁS el momento causado por la fuerza descendente \\(50 \\times 3\\).", opts: [
-                { t: "50 N\\(\\cdot\\)m", c: false },
-                { t: "150 N\\(\\cdot\\)m", c: false },
-                { t: "350 N\\(\\cdot\\)m (Antihorario)", c: true },
-                { t: "0 N\\(\\cdot\\)m", c: false }
-            ]},
-            { cap: 5, type: "Práctica", q: "Varilla AB sin peso, articulada en los extremos (0,0) y (3,4). A tensión con 50 N. Calcule la componente X de la fuerza en el pasador A.", h: "Triángulo 3-4-5. La componente horizontal se relaciona con el cateto X (que vale 3).", opts: [
-                { t: "40 N", c: false },
-                { t: "50 N", c: false },
-                { t: "30 N", c: true },
-                { t: "15 N", c: false }
-            ]},
-            { cap: 5, type: "Práctica", q: "Trampolín de 40 kg y 4 m sostenido por 2 pasadores: en extremo trasero, y a 1 m adelante. Determine la dirección de la reacción en el trasero.", h: "El peso a los 2m empuja el trampolín hacia abajo adelante, haciendo palanca que eleva la parte de atrás.", opts: [
-                { t: "Hacia arriba.", c: false },
-                { t: "Hacia abajo (jalando el trampolín para que no voltee).", c: true },
-                { t: "Horizontal a la izquierda.", c: false },
-                { t: "Horizontal a la derecha.", c: false }
-            ]},
-            { cap: 5, type: "Práctica", q: "Una fuerza en 3D paralela al eje Y hace rotar un objeto. ¿Cuáles ecuaciones de momento registrarán un valor distinto de cero?", h: "Una fuerza paralela a un eje no puede generar momento alrededor de ese mismo eje.", opts: [
-                { t: "\\(\\sum M_y\\) y \\(\\sum M_z\\)", c: false },
-                { t: "\\(\\sum M_x\\) y \\(\\sum M_y\\)", c: false },
-                { t: "\\(\\sum M_x\\) y \\(\\sum M_z\\)", c: true },
-                { t: "Solo \\(\\sum M_y\\)", c: false }
-            ]},
+    function actualizarAvance() {
+        const ok = Object.values(estado).filter(v => v === 'ok').length;
+        const vistas = Object.values(estado).filter(v => v === 'vista').length;
+        document.getElementById('cuenta-ok').textContent = ok;
+        document.getElementById('cuenta-vistas').textContent = vistas ? `· ${vistas} con solución vista` : '';
+        document.getElementById('barra').style.width = (100 * ok / TOTAL) + '%';
+    }
 
-            // ================= CAPITULO 6: ARMADURAS Y MARCOS =================
-            { cap: 6, type: "Teoría", q: "¿Cuál es la diferencia fundamental entre una armadura (truss) y un marco (frame)?", h: "Las armaduras son ensamblajes de barras esbeltas; los marcos tienen vigas pesadas.", opts: [
-                { t: "Las armaduras son de madera, los marcos de acero.", c: false },
-                { t: "Armadura: todos son miembros de dos fuerzas. Marco: al menos un miembro multifuerza.", c: true },
-                { t: "Las armaduras se mueven, los marcos son estáticos.", c: false },
-                { t: "No hay diferencia mecánica real.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "Nombre las dos asunciones principales en el diseño y análisis estático de armaduras ideales.", h: "Esto garantiza que los miembros solo sufran compresión o tensión axial.", opts: [
-                { t: "Conexiones por pasadores lisos y cargas aplicadas exclusivamente en los nudos.", c: true },
-                { t: "Uniones soldadas rígidamente y cargas distribuidas.", c: false },
-                { t: "Barras sin masa y cargas variables con el tiempo.", c: false },
-                { t: "Simetría perfecta y apoyos de rodillo en todos los nodos.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "¿Qué establece la condición de tensión y compresión visualmente en un DCL de un nudo?", h: "Piensa en el vector desde la perspectiva de la pequeña bolita (el pasador).", opts: [
-                { t: "Tensión empuja al nudo; compresión jala del nudo.", c: false },
-                { t: "Ambas dibujan el vector apuntando hacia abajo.", c: false },
-                { t: "Tensión jala y se aleja del nudo; Compresión aplasta y apunta hacia el nudo.", c: true },
-                { t: "Dependen del ángulo respecto al eje X.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "En el 'Método de los Nudos', ¿por qué se aísla cada unión como una partícula?", h: "Un punto en el espacio no tiene brazos de palanca.", opts: [
-                { t: "Para evitar usar trigonometría.", c: false },
-                { t: "Porque las fuerzas concurren en un punto, anulando ecuaciones de momento.", c: true },
-                { t: "Porque las barras se rompen más fácilmente por ahí.", c: false },
-                { t: "Para hacer el diagrama más grande visualmente.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "Al aplicar el Método de los Nudos en 2D, ¿cuál es el máximo de barras desconocidas que un nudo puede tener para ser resuelto?", h: "Solo tienes \\(\\sum F_x = 0\\) y \\(\\sum F_y = 0\\).", opts: [
-                { t: "3 barras desconocidas.", c: false },
-                { t: "2 barras desconocidas.", c: true },
-                { t: "4 barras desconocidas.", c: false },
-                { t: "Infinitas barras.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "Regla 'miembro cero': Nudo sin carga externa y solo 2 barras no colineales unidas. ¿Qué fuerzas tienen?", h: "No hay forma de que dos fuerzas con distinto ángulo se anulen mutuamente sin una tercera.", opts: [
-                { t: "Ambas tienen fuerza nula (cero).", c: true },
-                { t: "Una está en tensión y otra en compresión.", c: false },
-                { t: "Ambas soportan todo el peso de la armadura.", c: false },
-                { t: "Tienen fuerzas iguales a las reacciones de los apoyos.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "Regla 'miembro cero': Nudo sin carga, 3 barras unidas (2 de ellas colineales rectas). ¿Qué pasa con la tercera barra?", h: "Las dos rectas se equilibran entre sí, la intrusa lateral no tiene contraparte.", opts: [
-                { t: "Soporta el doble de fuerza que las otras.", c: false },
-                { t: "Las tres fuerzas se distribuyen por igual a 120 grados.", c: false },
-                { t: "La tercera barra (no colineal) tiene fuerza nula obligatoriamente.", c: true },
-                { t: "Romperá el equilibrio del nudo causando colapso.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "Si los miembros de fuerza cero teóricamente no soportan carga, ¿por qué se fabrican e instalan en armaduras reales?", h: "Un puente experimenta viento lateral o vibración al paso de vehículos.", opts: [
-                { t: "Solo por estética y simetría visual.", c: false },
-                { t: "Para agregar peso y asentar la estructura.", c: false },
-                { t: "Proveen estabilidad, previenen pandeo bajo compresión y soportan cambios de carga.", c: true },
-                { t: "Es un error de diseño común en ingeniería.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "¿En qué escenario es estratégicamente superior el 'Método de las Secciones' sobre el de Nudos?", h: "Imagina una torre de grúa inmensa y solo quieres saber la tensión de una barra en el medio.", opts: [
-                { t: "Para determinar las reacciones en los apoyos de tierra.", c: false },
-                { t: "Cuando necesitas hallar rápido la fuerza de una barra central sin calcular todo desde los bordes.", c: true },
-                { t: "Cuando la estructura tiene articulaciones oxidadas.", c: false },
-                { t: "Es obligatorio usarlo si hay cargas diagonales.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "¿Qué principio físico valida el uso del Método de las Secciones?", h: "Si partes un pastel que no se mueve, la porción cortada tampoco se moverá sola.", opts: [
-                { t: "Principio de transmisibilidad de masas.", c: false },
-                { t: "Teorema de Varignon estricto.", c: false },
-                { t: "Si el objeto completo está en equilibrio, cualquier fragmento o sección cortada también lo está.", c: true },
-                { t: "Tercera ley de la termodinámica.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "En el Método de las Secciones 2D, ¿cuántas barras desconocidas como máximo debes cortar para que el corte sea resoluble?", h: "Un fragmento cortado se comporta como un cuerpo rígido plano y aporta 3 ecuaciones estáticas.", opts: [
-                { t: "Mínimo 4.", c: false },
-                { t: "Máximo 3 barras incógnita.", c: true },
-                { t: "Solo 1 barra.", c: false },
-                { t: "Todas las que intercepte una línea horizontal estricta.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "Al seccionar tres barras, ¿cómo hallas la fuerza de una de ellas formulando una Sola Ecuación?", h: "Apunta al lugar geométrico donde las otras dos incógnitas cruzan sus líneas.", opts: [
-                { t: "Sumando las tres fuerzas y dividiendo por 3.", c: false },
-                { t: "Asumiendo que las diagonales valen cero.", c: false },
-                { t: "Aplicando momento exacto en la intersección visual de las otras dos barras cortadas.", c: true },
-                { t: "Tomando derivadas parciales del sistema general.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "En marcos, si separas mentalmente un pasador que une el Miembro A y B, ¿cómo dibujas la fuerza en cada DCL?", h: "Para cada acción, hay una reacción idéntica y en reversa.", opts: [
-                { t: "Solo se dibuja en el miembro más grande para simplificar.", c: false },
-                { t: "Se dibujan como fuerzas iguales apuntando hacia el mismo lado.", c: false },
-                { t: "Pares de fuerzas de igual magnitud pero sentido estrictamente opuesto en cada miembro (3a Ley de Newton).", c: true },
-                { t: "Se dibujan perpendiculares a la superficie de los miembros.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "¿Qué es una 'máquina' en el contexto de la estática estructural?", h: "Unos alicates o un gato hidráulico son ejemplos.", opts: [
-                { t: "Un ensamblaje estático que no admite ningún tipo de deformación.", c: false },
-                { t: "Estructuras diseñadas para alterar/transmitir fuerzas, con partes móviles y miembros multifuerza.", c: true },
-                { t: "Un motor de combustión interna analizado térmicamente.", c: false },
-                { t: "El equivalente matemático a un tensor de segundo orden.", c: false }
-            ]},
-            { cap: 6, type: "Teoría", q: "Si una polea está unida al eslabón de un marco y el cable la rodea, ¿cómo conviene aislarla en el DCL?", h: "Separar la rueda de la barra genera más incógnitas en el pasador interno.", opts: [
-                { t: "Manteniendo la polea unida al DCL y exponiendo las tensiones del cable cortado a los lados.", c: true },
-                { t: "Ignorar la polea si el cable no se mueve.", c: false },
-                { t: "Calcular primero la aceleración angular de la polea.", c: false },
-                { t: "Remover la polea y aplicar una carga concentrada doble en el pasador.", c: false }
-            ]},
-            { cap: 6, type: "Práctica", q: "Un nudo en forma de 'T' no tiene carga externa. La barra transversal (el techo de la T) es un solo tubo continuo. ¿Cuál es la fuerza en la barra perpendicular?", h: "La barra inferior vertical llega, choca en 90 grados, pero no tiene nadie que la contrarreste verticalmente.", opts: [
-                { t: "Es un promedio de las tensiones horizontales.", c: false },
-                { t: "Fuerza Cero.", c: true },
-                { t: "Tensión máxima, a punto de fluencia.", c: false },
-                { t: "Compresión infinita.", c: false }
-            ]},
-            { cap: 6, type: "Práctica", q: "En un nudo concurren carga vertical abajo 100N, barra A vertical y barra B horizontal. Calcule la fuerza en A y B.", h: "Separa X y Y mentalmente. B está sola en horizontal. A lucha sola contra la carga en vertical.", opts: [
-                { t: "A = 50 N, B = 50 N", c: false },
-                { t: "A = 0 N, B = 100 N", c: false },
-                { t: "A = 100 N (Tensión asumiendo nudo jalando arriba), B = Fuerza Cero.", c: true },
-                { t: "A = 100 N (Compresión asumiendo nudo bajando), B = 100 N", c: false }
-            ]},
-            { cap: 6, type: "Práctica", q: "Método Secciones: Se aísla mitad izquierda. Se cortan: cordón superior horizontal, cordón inferior horizontal y una diagonal. Para calcular el cordón INFERIOR, ¿dónde pivotas momentos?", h: "El cordón superior y la diagonal cortada se intersectarán en algún nudo de la parte superior derecha (fuera o dentro del diagrama cortado).", opts: [
-                { t: "En el apoyo del suelo.", c: false },
-                { t: "En el nudo superior donde se cruzan la línea del cordón superior y la diagonal cortada.", c: true },
-                { t: "En el centroide exacto del fragmento.", c: false },
-                { t: "En cualquier punto sobre el cordón inferior mismo.", c: false }
-            ]},
-            { cap: 6, type: "Práctica", q: "Polea de radio 0.5 m atornillada al final de un brazo de marco. Cable rodea polea con tensión de 200 N (ambos lados apuntan hacia abajo). Al dejar polea pegada al DCL del brazo, ¿qué efecto genera?", h: "Ambas fuerzas de 200N jalan el borde del disco.", opts: [
-                { t: "Una fuerza concentrada de 400N justo en el tornillo, sin momentos extra.", c: false },
-                { t: "Dos fuerzas de 200 N empujando hacia arriba en el pasador.", c: false },
-                { t: "Una fuerza de 200N en el tornillo central.", c: false },
-                { t: "Dos fuerzas abajo de 200 N, cada una ubicada a 0.5 m del pasador de la polea.", c: true }
-            ]},
-            { cap: 6, type: "Práctica", q: "Armadura triangular equilátera simple (3 nudos, 3 barras). Carga vertical F en el nudo superior cenital. ¿Cuál es la reacción vertical en los apoyos de la base?", h: "Un triángulo equilátero con carga central distribuye geométricamente perfecto la compresión a los lados.", opts: [
-                { t: "F/3 en cada apoyo.", c: false },
-                { t: "F en el apoyo derecho, 0 en el izquierdo.", c: false },
-                { t: "F/2 en cada apoyo vertical.", c: true },
-                { t: "F multiplicado por el coseno de 60 grados.", c: false }
-            ]}
-        ];
-
-        // Estado
-        let currentIndex = 0;
-        let filteredData = quizDatabase;
-        let currentOptions = [];
-        let hasAnsweredCurrent = false;
-
-        // Referencias al DOM
-        const qText = document.getElementById('question-text');
-        const optionsContainer = document.getElementById('options-container');
-        const hText = document.getElementById('hint-text');
-        const capLabel = document.getElementById('cap-label');
-        const counterLabel = document.getElementById('counter-label');
-        const hintContainer = document.getElementById('hint-container');
-        const feedbackContainer = document.getElementById('feedback-container');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-
-        // Utilidad para mezclar array (Fisher-Yates)
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
+    // ---------------- construcción de la página
+    function tarjeta(q) {
+        const id = q.id.replace('.', '_');
+        const div = document.createElement('div');
+        div.id = 'q_' + id;
+        div.className = q.tipo === 'teoria' ? 'problem-card' : 'numeric-card';
+        const etiqueta = q.tipo === 'teoria' ? 'Teoría' : 'Práctica';
+        let html = `<p><strong>Pregunta ${q.id} (${etiqueta}):</strong><span class="insignia"></span> ${q.texto}</p>`;
+        if (q.tipo === 'teoria') {
+            html += '<ul class="opciones">' + q.opciones.map((o, i) =>
+                `<li><label><input type="radio" name="r_${id}" value="${i}"> ${LETRAS[i]}) ${o}</label></li>`).join('') + '</ul>';
+        } else {
+            if (q.pista) html += `<div class="pista-calculo">💡 Pista: ${q.pista}</div>`;
+            html += q.campos.map((f, i) =>
+                `<div class="campo"><span class="etiqueta">${f.etiqueta} =</span>
+                 <input type="text" inputmode="decimal" autocomplete="off" data-i="${i}" aria-label="respuesta ${i + 1}">
+                 <span>${f.unidad}</span><span class="marca"></span></div>`).join('');
         }
+        html += `<button class="btn-check-answer">Verificar</button><button class="btn-solucion">Ver solución</button>
+                 <div class="feedback"></div>
+                 <div class="idea-clave"><strong>Idea clave:</strong> ${q.idea}</div>`;
+        div.innerHTML = html;
+        div.querySelector('.btn-check-answer').addEventListener('click', () =>
+            q.tipo === 'teoria' ? verificarOpcion(q, div) : verificarNumerica(q, div));
+        div.querySelector('.btn-solucion').addEventListener('click', () => verSolucion(q, div));
+        if (estado[q.id]) marcar(q, div, estado[q.id]);
+        return div;
+    }
 
-        // Inicializar
-        function init() {
-            renderCard();
-        }
+    function construir() {
+        const indice = document.getElementById('indice');
+        const cont = document.getElementById('preguntas');
+        indice.innerHTML = '<div class="d-flex flex-wrap gap-2">' + BLOQUES.map((b, i) =>
+            `<a class="btn btn-sm btn-outline-primary" href="#bloque${i + 1}">${i + 1}. ${b.titulo}</a>`).join('') + '</div>';
+        BLOQUES.forEach((b, i) => {
+            const h2 = document.createElement('h2');
+            h2.id = 'bloque' + (i + 1);
+            h2.className = 'mb-3 mt-5 text-secondary border-bottom pb-2';
+            h2.textContent = `Bloque ${i + 1}: ${b.titulo}`;
+            const ref = document.createElement('p');
+            ref.className = 'ref-bloque';
+            ref.textContent = 'Bedford, ' + b.ref;
+            cont.append(h2, ref);
+            b.preguntas.forEach(q => cont.appendChild(tarjeta(q)));
+        });
+        actualizarAvance();
+    }
 
-        // Filtrado por Capítulo
-        function filterData(cap) {
-            filterBtns.forEach(btn => {
-                if(btn.dataset.filter == cap) {
-                    btn.classList.add('bg-blue-600', 'text-white');
-                    btn.classList.remove('bg-slate-200', 'text-slate-700');
-                } else {
-                    btn.classList.add('bg-slate-200', 'text-slate-700');
-                    btn.classList.remove('bg-blue-600', 'text-white');
-                }
+    // ---------------- retroalimentación
+    function tipografiar(el) {
+        if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(() => {});
+    }
+    function mensaje(div, clase, texto, detalle) {
+        const fb = div.querySelector('.feedback');
+        fb.innerHTML = `<p class="${clase}">${texto}</p>` + (detalle ? `<div class="retro">${detalle}</div>` : '');
+        tipografiar(fb);
+    }
+    function marcar(q, div, como) {
+        div.querySelector('.idea-clave').style.display = 'block';
+        const ins = div.querySelector('.insignia');
+        ins.textContent = como === 'ok' ? '✅ resuelta' : '👁 solución vista';
+        ins.style.color = como === 'ok' ? 'var(--success-green)' : '#6c757d';
+    }
+    function registrar(q, div, como) {
+        if (estado[q.id] !== 'ok') estado[q.id] = como;   // una vez resuelta, se queda resuelta
+        guardar();
+        marcar(q, div, estado[q.id]);
+        actualizarAvance();
+    }
+    function fallo(q, div, texto, detalle) {
+        intentos[q.id] = (intentos[q.id] || 0) + 1;
+        mensaje(div, 'wrong-feedback', texto, detalle);
+        if (intentos[q.id] >= 2) div.querySelector('.btn-solucion').style.display = 'inline-block';
+    }
+    function verSolucion(q, div) {
+        if (q.tipo === 'teoria') {
+            const r = div.querySelector(`input[value="${q.correcta}"]`);
+            if (r) r.checked = true;
+            mensaje(div, 'aviso-feedback', `La respuesta es la ${LETRAS[q.correcta]}).`);
+        } else {
+            div.querySelectorAll('.campo').forEach((c, i) => {
+                c.querySelector('.marca').textContent = '→ ' + redondear(q.campos[i].valor);
             });
+            mensaje(div, 'aviso-feedback', 'Revise la idea clave y vuelva a intentarlo en otra pregunta del mismo tipo.');
+        }
+        registrar(q, div, 'vista');
+    }
 
-            if (cap === 'Todos') {
-                filteredData = quizDatabase;
-            } else {
-                filteredData = quizDatabase.filter(item => item.cap === parseInt(cap));
+    function verificarOpcion(q, div) {
+        const sel = div.querySelector('input[type="radio"]:checked');
+        if (!sel) { mensaje(div, 'aviso-feedback', '⚠️ Seleccione una respuesta.'); return; }
+        if (Number(sel.value) === q.correcta) {
+            mensaje(div, 'correct-feedback', '✅ ¡Correcto!');
+            registrar(q, div, 'ok');
+        } else {
+            const r = q.retro ? q.retro[Number(sel.value)] : null;
+            fallo(q, div, '❌ Incorrecto.', r || 'Analice de nuevo el concepto.');
+        }
+    }
+
+    function leerNumero(s) {
+        s = s.trim().replace(/\s+/g, '').replace(/[−–]/g, '-').replace(',', '.');
+        if (s === '' || !/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(s)) return NaN;
+        return Number(s);
+    }
+    function redondear(v) {
+        return Number(v.toPrecision(3)).toString();
+    }
+    function verificarNumerica(q, div) {
+        let todos = true, vacio = false;
+        const avisos = [];
+        const varias = q.campos.length > 1;
+        div.querySelectorAll('.campo').forEach((c, i) => {
+            const input = c.querySelector('input');
+            const marca = c.querySelector('.marca');
+            const x = leerNumero(input.value);
+            const v = q.campos[i].valor;
+            const tol = Math.max(TOL_REL * Math.abs(v), 1e-9);
+            input.classList.remove('bien', 'mal');
+            marca.textContent = '';
+            if (isNaN(x)) { vacio = true; todos = false; return; }
+            if (Math.abs(x - v) <= tol) { input.classList.add('bien'); marca.textContent = '✓'; marca.style.color = 'var(--success-green)'; }
+            else {
+                todos = false; input.classList.add('mal'); marca.textContent = '✗'; marca.style.color = 'var(--numeric-red)';
+                const pre = varias ? `<b>${q.campos[i].etiqueta}:</b> ` : '';
+                const e = (q.errores || []).find(e => e.campo === i && Math.abs(x - e.valor) <= TOL_REL * Math.abs(e.valor) + 1e-9);
+                if (e) avisos.push(pre + e.mensaje);
+                else if (Math.abs(-x - v) <= tol) avisos.push(pre + 'El valor es correcto, pero revise el <b>signo</b>.');
             }
-            currentIndex = 0;
-            renderCard();
+        });
+        if (vacio) { mensaje(div, 'aviso-feedback', '⚠️ Escriba un número en cada casilla (por ejemplo 12.5 o -3.40).'); return; }
+        if (todos) {
+            mensaje(div, 'correct-feedback', '✅ ¡Excelente! Los valores son correctos.');
+            registrar(q, div, 'ok');
+        } else {
+            const detalle = avisos.length
+                ? (avisos.length > 1 ? '<ul>' + avisos.map(a => `<li>${a}</li>`).join('') + '</ul>' : avisos[0])
+                : '💡 ' + q.ayuda;
+            fallo(q, div, avisos.length ? '❌ Lo marcado en rojo no coincide.' : '❌ Hay valores fuera del rango aceptado.', detalle);
         }
+    }
 
-        // Renderizar la tarjeta activa
-        function renderCard() {
-            if(filteredData.length === 0) return;
+    document.getElementById('reiniciar').addEventListener('click', () => {
+        if (!confirm('¿Borrar su avance y empezar de nuevo?')) return;
+        estado = {};
+        guardar();
+        location.reload();
+    });
 
-            hasAnsweredCurrent = false;
-            feedbackContainer.classList.add('hidden');
-            hintContainer.classList.add('hidden');
-
-            const item = filteredData[currentIndex];
-            capLabel.innerText = `Capítulo ${item.cap} - ${item.type}`;
-            counterLabel.innerText = `Pregunta ${currentIndex + 1} de ${filteredData.length}`;
-            
-            qText.innerHTML = item.q;
-            hText.innerHTML = item.h;
-
-            // Clonar opciones y mezclarlas aleatoriamente
-            currentOptions = [...item.opts];
-            shuffleArray(currentOptions);
-
-            // Generar botones de opciones
-            optionsContainer.innerHTML = '';
-            currentOptions.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.className = `option-btn w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 text-lg shadow-sm text-slate-700`;
-                btn.innerHTML = `<span class="font-bold mr-3 text-slate-400 block sm:inline-block mb-1 sm:mb-0">${String.fromCharCode(65 + index)}.</span> ${opt.t}`;
-                btn.onclick = () => handleSelection(btn, opt.c, index);
-                optionsContainer.appendChild(btn);
-            });
-
-            // Procesar LaTeX de la nueva pregunta generada
-            if (window.MathJax) {
-                MathJax.typesetPromise().catch(function (err) {
-                    console.log('MathJax error: ' + err.message);
-                });
-            }
-        }
-
-        // Evaluar selección
-        function handleSelection(clickedBtn, isCorrect, selectedIndex) {
-            if (hasAnsweredCurrent) return; // Evitar múltiples selecciones
-            hasAnsweredCurrent = true;
-
-            const allBtns = optionsContainer.querySelectorAll('.option-btn');
-            
-            // Deshabilitar todos los botones
-            allBtns.forEach((btn, idx) => {
-                btn.disabled = true;
-                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300');
-                
-                // Mostrar correcta siempre
-                if (currentOptions[idx].c) {
-                    btn.classList.replace('border-slate-200', 'border-emerald-500');
-                    btn.classList.add('bg-emerald-50', 'text-emerald-900');
-                    btn.innerHTML += ` <span class="float-right text-emerald-600 font-bold">✅ Correcta</span>`;
-                }
-            });
-
-            // Reacción visual al botón clicado (si fue incorrecto)
-            if (!isCorrect) {
-                clickedBtn.classList.replace('border-slate-200', 'border-red-400');
-                clickedBtn.classList.add('bg-red-50', 'text-red-900');
-                clickedBtn.innerHTML += ` <span class="float-right text-red-600 font-bold">❌ Incorrecta</span>`;
-                
-                // Feedback
-                feedbackContainer.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800');
-                feedbackContainer.classList.add('bg-red-100', 'text-red-800');
-                feedbackContainer.innerHTML = 'Repasa la teoría. Lee la pista para comprender la lógica detrás de la opción correcta.';
-            } else {
-                feedbackContainer.classList.remove('hidden', 'bg-red-100', 'text-red-800');
-                feedbackContainer.classList.add('bg-emerald-100', 'text-emerald-800');
-                feedbackContainer.innerHTML = '¡Excelente razonamiento estático!';
-            }
-        }
-
-        // Mostrar u ocultar pista
-        function toggleHint() {
-            hintContainer.classList.toggle('hidden');
-        }
-
-        // Controles de navegación
-        function nextCard() {
-            if (currentIndex < filteredData.length - 1) {
-                currentIndex++;
-                renderCard();
-            } else {
-                alert("¡Felicidades! Has revisado todas las preguntas de esta selección.");
-            }
-        }
-
-        function prevCard() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                renderCard();
-            }
-        }
-
-        // Iniciar al cargar
-        window.onload = init;
+    construir();
     </script>
 </body>
 </html>
